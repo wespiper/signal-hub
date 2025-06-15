@@ -97,3 +97,7 @@ omit = ["*/tests/*", "*/test_*"]
 
 [tool.poetry.scripts]
 signal-hub = "signal_hub.cli:app"
+
+[tool.bandit]
+exclude_dirs = ["tests", "docs"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_task tests

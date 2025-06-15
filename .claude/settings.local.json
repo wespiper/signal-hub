@@ -16,7 +16,9 @@
       "Bash(chmod:*)",
       "Bash(gh api:*)",
       "Bash(--method PUT )",
-      "Bash(--input /tmp/branch-protection.json)"
+      "Bash(--input /tmp/branch-protection.json)",
+      "Bash(poetry --version)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }

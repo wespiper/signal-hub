@@ -1,0 +1,1 @@
+"""Signal Hub test suite."""
