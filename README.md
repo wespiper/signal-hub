@@ -170,7 +170,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## Roadmap
 
-### Phase 1: Open Source Foundation (Sprints 1-2 Complete ✅)
+### Phase 1: Open Source Foundation (Sprints 1-3 Complete ✅)
 - ✅ Basic MCP server implementation with plugin architecture
 - ✅ Codebase indexing and embedding pipeline
 - ✅ File parser framework (Python, JavaScript, Markdown)
@@ -185,23 +185,28 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 - ✅ **NEW: MCP tools (search_code, explain_code, find_similar, get_context)**
 - ✅ **NEW: 5x performance improvement in embedding generation**
 
-### Phase 2: Model Routing & Optimization (Next - Sprint 3)
-- 🚀 Rule-based model routing (Haiku/Sonnet/Opus)
-- 🔄 Semantic caching for repeated queries
-- 💰 Basic cost tracking and reporting
-- ⬆️ Manual escalation mechanism
-- 🧠 ML-powered routing optimization (Pro edition)
-- 📊 User feedback collection and learning
+### Phase 2: Model Routing & Optimization (Sprint 3 Complete ✅)
+- ✅ Rule-based model routing (Haiku/Sonnet/Opus)
+- ✅ Semantic caching for repeated queries
+- ✅ Basic cost tracking and reporting
+- ✅ Manual escalation mechanism (@haiku/@sonnet/@opus)
+- ✅ Cache management and eviction strategies
+- ✅ Routing configuration system
+- ✅ Security foundations (API keys, rate limiting, auth)
 
-### Phase 3: Monetization
+### Phase 3: Polish & Documentation (Next - Sprint 4)
+- 📚 Comprehensive setup and usage documentation
+- 🎯 Example configurations and tutorials
+- ⚡ Performance optimizations
+- 🚀 Community launch preparation
+- 📊 Simple analytics dashboard
+- 🔄 Production migration guides
+
+### Phase 4: Monetization & Scale
 - Pro tier with advanced features
 - Enterprise deployment options
 - Team management capabilities
 
-### Phase 4: Platform Expansion
-- IDE integrations
-- API for third-party tools
-- Advanced customization
 
 ## License
 
