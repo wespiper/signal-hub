@@ -31,6 +31,10 @@ class ServerSettings(BaseSettings):
     health_check_enabled: bool = Field(True, description="Enable health check endpoint")
     health_check_path: str = Field("/health", description="Health check path")
     
+    # Rate limiting
+    rate_limit_enabled: bool = Field(True, description="Enable rate limiting")
+    requests_per_minute: int = Field(60, description="Max requests per minute per client")
+    
     model_config = SettingsConfigDict(
         env_prefix="SIGNAL_HUB_SERVER_",
         env_file=".env",
@@ -115,7 +119,7 @@ class CacheSettings(BaseSettings):
     """Cache configuration settings."""
     
     enabled: bool = Field(True, description="Enable caching")
-    ttl_seconds: int = Field(3600, description="Cache TTL in seconds")
+    ttl: int = Field(3600, description="Cache TTL in seconds")
     max_size_mb: int = Field(500, description="Maximum cache size in MB")
     similarity_threshold: float = Field(
         0.95,

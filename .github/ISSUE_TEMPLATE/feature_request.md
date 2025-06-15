@@ -1,8 +1,8 @@
 ---
-name: Feature Request
+name: Feature request
 about: Suggest an idea for this project
 title: '[FEATURE] '
-labels: enhancement
+labels: enhancement, triage
 assignees: ''
 
 ---
@@ -16,13 +16,18 @@ A clear and concise description of what you want to happen.
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
 
+**Use case**
+Describe how you would use this feature in your workflow.
+
+**Expected impact**
+- Performance impact: [none/minimal/moderate/significant]
+- Breaking changes: [yes/no]
+- Edition: [Basic/Pro/Enterprise]
+
 **Additional context**
 Add any other context or screenshots about the feature request here.
 
-**Proposed Implementation**
-If you have ideas about how this could be implemented, please share them here.
-
-**Impact**
-- Who would benefit from this feature?
-- How would it improve the Signal Hub experience?
-- What use cases would it enable?
+**Are you willing to contribute?**
+- [ ] Yes, I'd like to implement this feature
+- [ ] Yes, I'd like to help test this feature
+- [ ] No, but I'm available for questions

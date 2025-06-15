@@ -26,6 +26,8 @@ from signal_hub.config.loader import load_config, validate_config
 from signal_hub.core.protocol import ProtocolHandler, MessageType, ErrorCode, ProtocolError
 from signal_hub.core.tools import ToolRegistry
 from signal_hub.core.plugins import PluginManager
+from signal_hub.core.middleware import create_middleware_stack
+from signal_hub.core.monitoring import get_monitoring_service, MONITORING_TOOLS, handle_monitoring_tool
 from signal_hub.utils.logging import setup_logging, get_logger
 
 logger = get_logger(__name__)
@@ -42,6 +44,7 @@ class SignalHubServer:
         self._running = False
         self._server: Optional[Server] = None
         self._shutdown_event = asyncio.Event()
+        self.monitoring_service = get_monitoring_service()
         
         # Setup logging
         setup_logging(
@@ -51,11 +54,24 @@ class SignalHubServer:
             rich_console=settings.logging.rich_console
         )
         
+        # Setup middleware
+        self.middleware = create_middleware_stack(
+            enable_logging=True,
+            enable_metrics=True,
+            enable_rate_limiting=settings.server.rate_limit_enabled,
+            enable_caching=settings.cache.enabled,
+            rate_limit=settings.server.requests_per_minute,
+            cache_ttl=settings.cache.ttl
+        )
+        
         # Load plugins
         self._load_plugins()
         
         # Register protocol handlers
         self._register_handlers()
+        
+        # Register monitoring tools
+        self._register_monitoring_tools()
     
     def _load_plugins(self):
         """Load enabled plugins."""
@@ -88,6 +104,41 @@ class SignalHubServer:
         self.protocol.register_handler(MessageType.LIST_TOOLS, self._handle_list_tools)
         self.protocol.register_handler(MessageType.CALL_TOOL, self._handle_call_tool)
         self.protocol.register_handler(MessageType.SHUTDOWN, self._handle_shutdown)
+    
+    def _register_monitoring_tools(self):
+        """Register monitoring tools."""
+        for tool_def in MONITORING_TOOLS:
+            from signal_hub.core.tools import Tool, ParameterDefinition
+            
+            # Create parameter definitions
+            params = []
+            input_schema = tool_def.get("inputSchema", {})
+            for prop_name, prop_def in input_schema.get("properties", {}).items():
+                params.append(ParameterDefinition(
+                    name=prop_name,
+                    type=prop_def.get("type", "string"),
+                    description=prop_def.get("description", ""),
+                    required=prop_name in input_schema.get("required", []),
+                    default=prop_def.get("default")
+                ))
+            
+            # Create handler closure for this specific tool
+            tool_name = tool_def["name"]
+            
+            def create_handler(name):
+                async def handler(**kwargs):
+                    return await handle_monitoring_tool(name, kwargs)
+                return handler
+            
+            tool = Tool(
+                name=tool_name,
+                description=tool_def["description"],
+                parameters=params,
+                handler=create_handler(tool_name),
+                edition_required="basic"
+            )
+            
+            self.tool_registry.register_tool(tool)
     
     async def _handle_initialize(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Handle initialization request."""
@@ -144,42 +195,45 @@ class SignalHubServer:
     
     async def _handle_call_tool(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Handle tool call request."""
-        params = message.get("params", {})
-        tool_name = params.get("name")
-        arguments = params.get("arguments", {})
+        # Create a handler that executes the tool
+        async def tool_handler(request: Dict[str, Any]) -> Dict[str, Any]:
+            params = request.get("params", {})
+            tool_name = params.get("name")
+            arguments = params.get("arguments", {})
+            
+            try:
+                # Execute tool
+                result = await self.tool_registry.execute_tool(tool_name, arguments)
+                
+                # Format response
+                if isinstance(result, dict):
+                    content = [TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2)
+                    )]
+                else:
+                    content = [TextContent(
+                        type="text",
+                        text=str(result)
+                    )]
+                
+                return self.protocol.create_response(
+                    request.get("id"),
+                    {"content": content}
+                )
+                
+            except ValueError as e:
+                raise ProtocolError(ErrorCode.TOOL_NOT_FOUND, str(e))
+            except Exception as e:
+                logger.exception(f"Tool execution failed: {tool_name}")
+                raise ProtocolError(
+                    ErrorCode.TOOL_ERROR,
+                    f"Tool execution failed: {str(e)}",
+                    {"tool": tool_name, "error": str(e)}
+                )
         
-        logger.info(f"Calling tool: {tool_name}")
-        
-        try:
-            # Execute tool
-            result = await self.tool_registry.execute_tool(tool_name, arguments)
-            
-            # Format response
-            if isinstance(result, dict):
-                content = [TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2)
-                )]
-            else:
-                content = [TextContent(
-                    type="text",
-                    text=str(result)
-                )]
-            
-            return self.protocol.create_response(
-                message.get("id"),
-                {"content": content}
-            )
-            
-        except ValueError as e:
-            raise ProtocolError(ErrorCode.TOOL_NOT_FOUND, str(e))
-        except Exception as e:
-            logger.exception(f"Tool execution failed: {tool_name}")
-            raise ProtocolError(
-                ErrorCode.TOOL_ERROR,
-                f"Tool execution failed: {str(e)}",
-                {"tool": tool_name, "error": str(e)}
-            )
+        # Process through middleware
+        return await self.middleware(message, tool_handler)
     
     async def _handle_shutdown(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Handle shutdown request."""
@@ -281,16 +335,47 @@ class SignalHubServer:
         
         async def health_check(request):
             """Health check endpoint."""
-            status = {
-                "status": "healthy" if self._running else "shutting_down",
-                "timestamp": datetime.utcnow().isoformat(),
-                "edition": self.settings.edition.value,
-                "version": "0.1.0"
-            }
+            status = await self.monitoring_service.health_check()
             return web.json_response(status)
+        
+        async def readiness_check(request):
+            """Readiness check endpoint."""
+            status = await self.monitoring_service.readiness_check()
+            return web.json_response(status)
+        
+        async def metrics(request):
+            """Metrics endpoint."""
+            format = request.query.get("format", "prometheus")
+            try:
+                metrics_data = await self.monitoring_service.get_metrics(format)
+                if format == "prometheus":
+                    return web.Response(
+                        text=metrics_data,
+                        content_type="text/plain; version=0.0.4"
+                    )
+                else:
+                    return web.json_response(json.loads(metrics_data))
+            except ValueError as e:
+                return web.json_response({"error": str(e)}, status=400)
+        
+        async def system_info(request):
+            """System info endpoint."""
+            info = await self.monitoring_service.get_system_info()
+            return web.json_response(info)
+        
+        async def debug_info(request):
+            """Debug info endpoint (only in debug mode)."""
+            if not self.settings.debug:
+                return web.json_response({"error": "Debug mode not enabled"}, status=403)
+            info = await self.monitoring_service.get_debug_info()
+            return web.json_response(info)
         
         app = web.Application()
         app.router.add_get(self.settings.server.health_check_path, health_check)
+        app.router.add_get("/ready", readiness_check)
+        app.router.add_get("/metrics", metrics)
+        app.router.add_get("/system", system_info)
+        app.router.add_get("/debug", debug_info)
         
         runner = web.AppRunner(app)
         await runner.setup()
@@ -303,10 +388,15 @@ class SignalHubServer:
         
         await site.start()
         logger.info(
-            f"Health check endpoint available at "
+            f"Monitoring endpoints available at "
             f"http://{self.settings.server.host}:{self.settings.server.port + 1}"
-            f"{self.settings.server.health_check_path}"
         )
+        logger.info(f"  Health: {self.settings.server.health_check_path}")
+        logger.info(f"  Ready: /ready")
+        logger.info(f"  Metrics: /metrics")
+        logger.info(f"  System: /system")
+        if self.settings.debug:
+            logger.info(f"  Debug: /debug")
         
         # Keep health server running until shutdown
         await self._shutdown_event.wait()

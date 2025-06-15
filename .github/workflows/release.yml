@@ -4,65 +4,268 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.1.0)'
+        required: true
+        type: string
 
-permissions:
-  contents: write
-  id-token: write
+env:
+  PYTHON_VERSION: "3.11"
+  POETRY_VERSION: "1.7.0"
 
 jobs:
-  release:
-    name: Create Release
+  validate:
+    name: Validate Release
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
     
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+    
+    - name: Validate version format
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+          echo "Invalid version format: $VERSION"
+          exit 1
+        fi
+    
+    - name: Check if version exists
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+          echo "Version v$VERSION already exists!"
+          exit 1
+        fi
+
+  test:
+    name: Run Tests
+    needs: validate
+    uses: ./.github/workflows/test.yml
+
+  build:
+    name: Build Distribution
+    needs: [validate, test]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install Poetry
       uses: snok/install-poetry@v1
+      with:
+        version: ${{ env.POETRY_VERSION }}
     
-    - name: Get version
-      id: version
-      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-    
-    - name: Build package
+    - name: Update version
       run: |
-        poetry version ${{ steps.version.outputs.version }}
+        poetry version ${{ needs.validate.outputs.version }}
+    
+    - name: Build packages
+      run: |
         poetry build
+    
+    - name: Check build
+      run: |
+        ls -la dist/
+        poetry run pip install dist/*.whl
+        poetry run signal-hub --version
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+  publish-test:
+    name: Publish to Test PyPI
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    environment: test-pypi
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        skip-existing: true
+    
+    - name: Test installation
+      run: |
+        pip install --index-url https://test.pypi.org/simple/ \
+          --extra-index-url https://pypi.org/simple/ \
+          signal-hub==${{ needs.validate.outputs.version }}
+        signal-hub --version
+
+  publish:
+    name: Publish to PyPI
+    needs: [validate, build, publish-test]
+    runs-on: ubuntu-latest
+    environment: pypi
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+  create-release:
+    name: Create GitHub Release
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
     
     - name: Generate changelog
       id: changelog
       run: |
-        # Get changelog for this version from CHANGELOG.md
-        awk '/^## \[${{ steps.version.outputs.version }}\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release-notes.md
-        echo "Release notes:"
-        cat release-notes.md
+        # Get previous tag
+        PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [[ -z "$PREV_TAG" ]]; then
+          RANGE=""
+        else
+          RANGE="$PREV_TAG..HEAD"
+        fi
+        
+        # Generate changelog
+        echo "## What's Changed" > changelog.md
+        echo "" >> changelog.md
+        
+        # Features
+        echo "### 🚀 Features" >> changelog.md
+        git log $RANGE --pretty=format:"- %s (%h)" --grep="feat:" >> changelog.md || true
+        echo "" >> changelog.md
+        
+        # Fixes
+        echo "### 🐛 Bug Fixes" >> changelog.md
+        git log $RANGE --pretty=format:"- %s (%h)" --grep="fix:" >> changelog.md || true
+        echo "" >> changelog.md
+        
+        # Other changes
+        echo "### 📚 Documentation" >> changelog.md
+        git log $RANGE --pretty=format:"- %s (%h)" --grep="docs:" >> changelog.md || true
+        echo "" >> changelog.md
+        
+        echo "### 🔧 Maintenance" >> changelog.md
+        git log $RANGE --pretty=format:"- %s (%h)" --grep="chore:\|build:\|ci:" >> changelog.md || true
+        echo "" >> changelog.md
+        
+        # Contributors
+        echo "### 👥 Contributors" >> changelog.md
+        git log $RANGE --pretty=format:"%an" | sort -u | sed 's/^/- @/' >> changelog.md
+        echo "" >> changelog.md
+        
+        echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ needs.validate.outputs.version }}"
     
-    - name: Create GitHub Release
+    - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        body_path: release-notes.md
+        tag_name: v${{ needs.validate.outputs.version }}
+        name: Signal Hub v${{ needs.validate.outputs.version }}
+        body_path: changelog.md
         files: dist/*
-        fail_on_unmatched_files: true
-        generate_release_notes: true
+        draft: false
+        prerelease: ${{ contains(needs.validate.outputs.version, '-') }}
+
+  docker:
+    name: Build and Push Docker Image
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
     
-    - name: Publish to Test PyPI
-      if: contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha')
-      env:
-        POETRY_PYPI_TOKEN_TEST_PYPI: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      run: |
-        poetry config repositories.test-pypi https://test.pypi.org/legacy/
-        poetry publish -r test-pypi
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     
-    - name: Publish to PyPI
-      if: "!contains(github.ref, 'rc') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha')"
-      env:
-        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/signal-hub:${{ needs.validate.outputs.version }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/signal-hub:latest
+          ghcr.io/${{ github.repository }}:${{ needs.validate.outputs.version }}
+          ghcr.io/${{ github.repository }}:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  announce:
+    name: Announce Release
+    needs: [validate, create-release]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send notification
       run: |
-        poetry publish
+        echo "🎉 Signal Hub v${{ needs.validate.outputs.version }} has been released!"
+        echo "PyPI: https://pypi.org/project/signal-hub/"
+        echo "Docker: docker pull signal-hub:${{ needs.validate.outputs.version }}"
+        echo "GitHub: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.validate.outputs.version }}"

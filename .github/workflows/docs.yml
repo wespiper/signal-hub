@@ -1,0 +1,70 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'mkdocs.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'mkdocs.yml'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  build-docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for git info
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-docs-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-docs-
+    
+    - name: Install MkDocs
+      run: |
+        pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-git-revision-date-localized-plugin
+    
+    - name: Validate links
+      run: |
+        pip install linkchecker
+        # Check internal links only for now
+        find docs -name "*.md" -exec linkchecker --no-status --check-extern {} \; || true
+    
+    - name: Build documentation
+      run: mkdocs build --strict
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: docs-site
+        path: site/
+    
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
+        cname: signal-hub.dev  # Optional custom domain

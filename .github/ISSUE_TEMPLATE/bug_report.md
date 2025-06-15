@@ -1,8 +1,8 @@
 ---
-name: Bug Report
+name: Bug report
 about: Create a report to help us improve
 title: '[BUG] '
-labels: bug
+labels: bug, triage
 assignees: ''
 
 ---
@@ -12,26 +12,35 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
-1. Configure Signal Hub with '...'
-2. Run command '....'
+1. Install Signal Hub with '...'
+2. Run command '...'
 3. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Actual behavior**
+What actually happened, including any error messages.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
- - OS: [e.g. macOS 14.0]
- - Python Version: [e.g. 3.11.5]
- - Signal Hub Version: [e.g. 0.1.0]
- - Claude Code Version: [e.g. latest]
+ - OS: [e.g. macOS 14.0, Ubuntu 22.04, Windows 11]
+ - Python version: [e.g. 3.11.5]
+ - Signal Hub version: [e.g. 0.1.0]
+ - Installation method: [pip, poetry, docker]
+ - Claude Code version: [if applicable]
 
-**Additional context**
-Add any other context about the problem here.
+**Configuration**
+```yaml
+# Paste your config/dev.yaml here (remove sensitive data)
+```
 
 **Logs**
 ```
-Please paste any relevant logs here
+# Paste relevant log output here
 ```
+
+**Additional context**
+Add any other context about the problem here.

@@ -49,31 +49,47 @@ Advanced features for teams and power users:
 ### Prerequisites
 
 - Python 3.11 or higher
-- Poetry (for dependency management)
-- Claude Code with MCP support
+- Docker Desktop
+- Git
 
-### Installation
+### One-Command Setup
 
-1. Clone the repository:
+#### macOS/Linux
 ```bash
 git clone https://github.com/wespiper/signal-hub.git
 cd signal-hub
+./scripts/setup.sh
+```
+
+#### Windows
+```powershell
+git clone https://github.com/wespiper/signal-hub.git
+cd signal-hub
+.\scripts\setup.ps1
+```
+
+### Manual Setup
+
+1. Install Poetry:
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
 2. Install dependencies:
 ```bash
-make dev-install
+poetry install
 ```
 
 3. Configure Signal Hub:
 ```bash
-cp config/example.yaml config/signal-hub.yaml
-# Edit config/signal-hub.yaml with your settings
+cp config/.env.example config/.env
+# Add your OpenAI API key for embeddings
 ```
 
-4. Start the MCP server:
+4. Start services:
 ```bash
-signal-hub serve
+cd docker && docker compose up -d
+cd .. && signal-hub serve --config config/dev.yaml
 ```
 
 5. Connect with Claude Code by adding Signal Hub to your MCP servers configuration.
@@ -103,35 +119,74 @@ Signal Hub consists of several key components:
 ### Running Tests
 
 ```bash
+# Run all tests with coverage
 make test
+
+# Run specific test categories
+pytest tests/unit/
+pytest tests/integration/
+
+# Generate coverage report
+make test-coverage
 ```
 
 ### Code Quality
 
 ```bash
-make lint      # Run linting
-make format    # Format code
-make type-check # Type checking
+make format     # Format code with Black
+make lint       # Run Ruff linter
+make type-check # Type checking with MyPy
+make quality    # Run all quality checks
 ```
+
+### Development Workflow
+
+1. **Start Development Environment**:
+   ```bash
+   make dev
+   ```
+
+2. **Run with Early Access Features**:
+   ```bash
+   SIGNAL_HUB_EARLY_ACCESS=true signal-hub serve
+   ```
+
+3. **Monitor Logs**:
+   ```bash
+   # JSON logs for production
+   SIGNAL_HUB_LOG_FORMAT=json signal-hub serve
+   
+   # Check metrics endpoint
+   curl http://localhost:3334/metrics
+   ```
 
 ### Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
+- 🐛 Report bugs using our [issue template](.github/ISSUE_TEMPLATE/bug_report.md)
+- 💡 Request features using our [feature template](.github/ISSUE_TEMPLATE/feature_request.md)
+- 🔧 Submit PRs following our [PR template](.github/pull_request_template.md)
+
 ## Roadmap
 
-### Phase 1: Open Source Foundation (Current)
-- ✅ Basic MCP server implementation
-- ✅ Codebase indexing and embedding
-- 🔄 RAG retrieval system
-- 🔄 Simple model routing
-- 📅 Semantic caching
+### Phase 1: Open Source Foundation (Complete ✅)
+- ✅ Basic MCP server implementation with plugin architecture
+- ✅ Codebase indexing and embedding pipeline
+- ✅ File parser framework (Python, JavaScript, Markdown)
+- ✅ ChromaDB integration for vector storage
+- ✅ Development environment with Docker
+- ✅ Comprehensive logging and monitoring
+- ✅ CI/CD pipeline with GitHub Actions
+- ✅ Security scanning and dependency management
 
-### Phase 2: Community & Intelligence
-- Advanced retrieval strategies
-- ML-powered routing optimization
-- User feedback collection
-- Performance analytics
+### Phase 2: Community & Intelligence (Next)
+- 🚀 RAG retrieval system with semantic search
+- 🧠 ML-powered routing optimization
+- 📊 User feedback collection and learning
+- 📈 Performance analytics dashboard
+- 🔄 Advanced caching strategies
+- 🌐 Web-based configuration UI
 
 ### Phase 3: Monetization
 - Pro tier with advanced features

@@ -1,21 +1,35 @@
-# Signal Hub Code Owners
-# This file defines who is responsible for code in this repository
+# CODEOWNERS for Signal Hub
+# This file defines who is responsible for code reviews
 
-# Default owners for everything in the repo
+# Default owner for everything
 * @wespiper
 
-# Core MCP server implementation
+# Core components
 /src/signal_hub/core/ @wespiper
+/src/signal_hub/config/ @wespiper
 
-# Plugin system (Pro/Enterprise features)
-/src/signal_hub/plugins/ @wespiper
+# Indexing and retrieval
+/src/signal_hub/indexing/ @wespiper
+/src/signal_hub/retrieval/ @wespiper
+
+# Storage and embeddings
+/src/signal_hub/storage/ @wespiper
+/src/signal_hub/indexing/embeddings/ @wespiper
+
+# Infrastructure
+/.github/ @wespiper
+/docker/ @wespiper
+/scripts/ @wespiper
 
 # Documentation
 /docs/ @wespiper
 *.md @wespiper
 
-# CI/CD and GitHub configuration
-/.github/ @wespiper
+# Tests
+/tests/ @wespiper
 
-# Planning and architecture
-/planning/ @wespiper
+# Configuration files
+pyproject.toml @wespiper
+poetry.lock @wespiper
+Makefile @wespiper
+.pre-commit-config.yaml @wespiper

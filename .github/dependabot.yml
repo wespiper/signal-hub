@@ -6,9 +6,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "02:00"
-    open-pull-requests-limit: 5
+      time: "03:00"
+    open-pull-requests-limit: 10
     reviewers:
+      - "wespiper"
+    assignees:
       - "wespiper"
     labels:
       - "dependencies"
@@ -23,23 +25,52 @@ updates:
           - "black"
           - "ruff"
           - "mypy"
-        update-types:
-          - "minor"
-          - "patch"
-  
+          - "pre-commit"
+      ml-dependencies:
+        patterns:
+          - "openai"
+          - "anthropic"
+          - "chromadb"
+          - "sentence-transformers"
+    ignore:
+      # Ignore major version updates for critical dependencies
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "mcp"
+        update-types: ["version-update:semver-major"]
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "02:00"
-    open-pull-requests-limit: 3
+      time: "03:00"
     reviewers:
+      - "wespiper"
+    assignees:
       - "wespiper"
     labels:
       - "dependencies"
       - "github-actions"
     commit-message:
       prefix: "ci"
+      include: "scope"
+
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    reviewers:
+      - "wespiper"
+    assignees:
+      - "wespiper"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "build"
       include: "scope"
