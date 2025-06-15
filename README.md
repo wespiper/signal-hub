@@ -98,11 +98,11 @@ cd .. && signal-hub serve --config config/dev.yaml
 
 Signal Hub provides several MCP tools for intelligent code navigation:
 
-- `search_codebase`: Semantic search across all code
-- `explain_code`: Deep explanation of code snippets
-- `find_references`: Find usages of functions/classes
-- `get_context`: Get relevant context for current work
-- `escalate_query`: Manual escalation to better model
+- `search_code`: Semantic search across your entire codebase
+- `explain_code`: Get detailed explanations with relevant context
+- `find_similar`: Find code similar to a given snippet
+- `get_context`: Get relevant context for your current task
+- `escalate_query`: Manual escalation to better model (coming in Sprint 3)
 
 ## Architecture
 
@@ -170,7 +170,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## Roadmap
 
-### Phase 1: Open Source Foundation (Complete ✅)
+### Phase 1: Open Source Foundation (Sprints 1-2 Complete ✅)
 - ✅ Basic MCP server implementation with plugin architecture
 - ✅ Codebase indexing and embedding pipeline
 - ✅ File parser framework (Python, JavaScript, Markdown)
@@ -179,14 +179,19 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 - ✅ Comprehensive logging and monitoring
 - ✅ CI/CD pipeline with GitHub Actions
 - ✅ Security scanning and dependency management
+- ✅ **NEW: RAG retrieval system with semantic search**
+- ✅ **NEW: Intelligent AST-based code chunking**
+- ✅ **NEW: Context assembly with deduplication**
+- ✅ **NEW: MCP tools (search_code, explain_code, find_similar, get_context)**
+- ✅ **NEW: 5x performance improvement in embedding generation**
 
-### Phase 2: Community & Intelligence (Next)
-- 🚀 RAG retrieval system with semantic search
-- 🧠 ML-powered routing optimization
+### Phase 2: Model Routing & Optimization (Next - Sprint 3)
+- 🚀 Rule-based model routing (Haiku/Sonnet/Opus)
+- 🔄 Semantic caching for repeated queries
+- 💰 Basic cost tracking and reporting
+- ⬆️ Manual escalation mechanism
+- 🧠 ML-powered routing optimization (Pro edition)
 - 📊 User feedback collection and learning
-- 📈 Performance analytics dashboard
-- 🔄 Advanced caching strategies
-- 🌐 Web-based configuration UI
 
 ### Phase 3: Monetization
 - Pro tier with advanced features

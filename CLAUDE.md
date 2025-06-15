@@ -25,7 +25,7 @@ Take the role of a senior principal engineer. Prioritize:
 
 See `docs/EDITIONS.md` for complete feature comparison.
 
-**Current Status**: Sprint 1 Complete! ✅ Moving to Sprint 2 (Enhanced Indexing & Retrieval) - Building the RAG system and advanced indexing capabilities.
+**Current Status**: Sprint 2 Complete! ✅ RAG system fully implemented with semantic search, intelligent chunking, context assembly, and MCP tools. Moving to Sprint 3 (Model Routing & Caching).
 
 ## Architecture Overview
 
@@ -181,15 +181,19 @@ signal-hub/
 │   ├── core/             # MCP server implementation
 │   │   ├── plugins.py    # Plugin system (✓ IMPLEMENTED)
 │   │   ├── features.py   # Feature flags (✓ IMPLEMENTED)
-│   │   ├── server.py     # MCP server with plugin support
-│   │   └── tools.py      # Tool registry
+│   │   ├── server.py     # MCP server with plugin support (✓ IMPLEMENTED)
+│   │   └── tools/        # MCP tools (✓ IMPLEMENTED)
 │   ├── plugins/          # Plugin implementations
 │   │   └── pro_example.py # Example Pro features
 │   ├── indexing/         # Code scanning and parsing
-│   │   ├── scanner.py    # Directory traversal
-│   │   ├── parsers/      # Language-specific parsers
-│   │   └── embeddings/   # Embedding generation
+│   │   ├── scanner.py    # Directory traversal (✓ IMPLEMENTED)
+│   │   ├── parsers/      # Language-specific parsers (✓ IMPLEMENTED)
+│   │   ├── embeddings/   # Embedding generation (✓ IMPLEMENTED)
+│   │   ├── chunking/     # Intelligent chunking (✓ IMPLEMENTED)
+│   │   └── metadata/     # Metadata extraction (✓ IMPLEMENTED)
 │   ├── retrieval/        # RAG implementation
+│   │   ├── search/       # Semantic search engine (✓ IMPLEMENTED)
+│   │   └── assembly/     # Context assembly (✓ IMPLEMENTED)
 │   ├── routing/          # Model selection logic
 │   ├── storage/          # Vector and cache stores
 │   └── utils/            # Shared utilities
@@ -217,13 +221,24 @@ signal-hub/
 - ✅ SH-S01-009: Logging and monitoring with metrics
 - ✅ SH-S01-010: CI/CD pipeline with GitHub Actions
 
-## Current Sprint Focus (Sprint 2)
+## Sprint 2 Achievements (Complete ✅)
 
-Enhancing indexing and retrieval capabilities:
-- SH-S02-011: Enhanced metadata extraction
-- SH-S02-012: Database abstraction layer
-- SH-S02-013: Batch processing optimization
-- Additional tickets TBD based on community feedback
+- ✅ SH-S02-011: Metadata extraction with AST parsing
+- ✅ SH-S02-012: Database abstraction layer for ChromaDB/pgvector
+- ✅ SH-S02-013: Batch processing with 5x throughput improvement
+- ✅ SH-S02-014: Semantic search with multiple modes
+- ✅ SH-S02-015: Intelligent chunking strategies
+- ✅ SH-S02-016: Context assembly with deduplication
+- ✅ SH-S02-017: MCP tool implementation (4 tools)
+
+## Current Sprint Focus (Sprint 3)
+
+Model routing and caching:
+- Rule-based routing (Haiku/Sonnet/Opus)
+- Semantic caching implementation
+- Manual escalation mechanism
+- Basic cost tracking
+- Security foundations
 
 ## Testing Strategy
 
