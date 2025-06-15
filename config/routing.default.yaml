@@ -1,0 +1,129 @@
+# Signal Hub Default Routing Configuration
+# This file provides the default routing rules that work well for most use cases
+# Copy to routing.yaml and modify as needed
+
+# Model-specific settings
+models:
+  haiku:
+    max_tokens: 1000
+    max_complexity: simple
+    preferred_tasks: 
+      - search
+      - simple_query
+      - list
+      - count
+      - find
+      - check
+      - verify
+      - lookup
+    
+  sonnet:
+    max_tokens: 4000
+    max_complexity: moderate
+    preferred_tasks:
+      - explain
+      - analyze
+      - summarize
+      - describe
+      - compare
+      - review
+      - suggest
+      - improve
+    
+  opus:
+    max_tokens: null  # No limit
+    max_complexity: complex
+    preferred_tasks:
+      - debug
+      - architect
+      - refactor
+      - design
+      - optimize
+      - implement
+      - solve
+      - create
+
+# Routing rules (evaluated in priority order)
+rules:
+  # Length-based routing (highest priority)
+  - name: length_based
+    enabled: true
+    priority: 1
+    thresholds:
+      haiku: 500     # Queries under 500 tokens go to Haiku
+      sonnet: 2000   # Queries under 2000 tokens go to Sonnet
+      # Anything above goes to Opus
+      
+  # Complexity-based routing
+  - name: complexity_based
+    enabled: true
+    priority: 2
+    indicators:
+      simple:
+        - what
+        - when
+        - where
+        - who
+        - which
+        - list
+        - show
+        - find
+        - get
+        - count
+      moderate:
+        - how
+        - why
+        - explain
+        - describe
+        - summarize
+        - compare
+        - difference
+        - similar
+      complex:
+        - analyze
+        - design
+        - architect
+        - optimize
+        - refactor
+        - implement
+        - solve
+        - debug
+        - performance
+      
+  # Task type routing (for MCP tools)
+  - name: task_type
+    enabled: true
+    priority: 3
+    mappings:
+      search_code: haiku
+      explain_code: sonnet
+      find_similar: haiku
+      get_context: sonnet
+      analyze_architecture: opus
+
+# Pattern-based overrides (always take precedence)
+overrides:
+  # Security analysis requires maximum care
+  - pattern: "(?i)(security|vulnerability|exploit|injection|auth|cve)"
+    model: opus
+    reason: "Security analysis requires maximum care and capability"
+    
+  # Performance optimization needs deep analysis
+  - pattern: "(?i)(performance|optimize|bottleneck|profil|benchmark)"
+    model: opus
+    reason: "Performance optimization needs deep technical analysis"
+    
+  # Architecture and system design
+  - pattern: "(?i)(architect|design\\s+pattern|scalab|distribut)"
+    model: opus
+    reason: "System design requires comprehensive understanding"
+    
+  # Critical debugging
+  - pattern: "(?i)(debug|troubleshoot|root\\s+cause|critical\\s+bug)"
+    model: opus
+    reason: "Complex debugging needs advanced reasoning"
+
+# Global settings
+default_model: haiku               # Default when no rules match
+cache_similarity_threshold: 0.85   # Minimum similarity for cache hits
+enable_escalation: true            # Allow manual model escalation

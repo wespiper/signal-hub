@@ -1,0 +1,89 @@
+# Signal Hub Security Configuration
+# This file configures security features including authentication, rate limiting, and API keys
+
+# API Key Management
+api_keys:
+  storage: encrypted_file        # Storage type
+  key_file: ~/.signal-hub/keys.enc  # Encrypted keys file
+  rotation_days: 90             # Days before rotation reminder
+  
+# Rate Limiting
+rate_limiting:
+  enabled: true                 # Enable rate limiting
+  backend: memory               # Backend type (memory or redis)
+  window_seconds: 3600          # Time window (1 hour)
+  
+  # Default limit for all requests
+  default_limit: 1000
+  
+  # Per-model limits
+  model_limits:
+    haiku: 5000                # Higher limit for cheap model
+    sonnet: 1000               # Medium limit
+    opus: 100                  # Lower limit for expensive model
+    
+  # Custom user limits (override defaults)
+  user_limits:
+    # admin: 10000             # Example: higher limit for admin
+    
+  # Redis configuration (if using redis backend)
+  # redis_url: redis://localhost:6379/0
+
+# Authentication
+authentication:
+  # Dashboard authentication
+  dashboard:
+    enabled: true              # Enable dashboard auth
+    type: basic                # Auth type (basic or disabled)
+    session_ttl_minutes: 60    # Session timeout
+    
+    # Users (passwords should be bcrypt hashed)
+    # Generate hash: python -c "import bcrypt; print(bcrypt.hashpw(b'password', bcrypt.gensalt()).decode())"
+    users:
+      # admin: "$2b$12$..."    # Example user
+      
+  # API authentication
+  api:
+    enabled: true              # Enable API auth
+    token_ttl_hours: 24        # Token lifetime
+    token_header: X-API-Token  # Header name for tokens
+    
+    # Allow specific endpoints without auth
+    public_endpoints:
+      - /health
+      - /metrics
+      - /docs
+
+# Security Headers
+headers:
+  # Standard security headers
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: "1; mode=block"
+  Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+  
+  # CORS settings
+  cors:
+    enabled: true
+    allowed_origins:
+      - http://localhost:3000
+      - https://app.signal-hub.ai
+    allowed_methods:
+      - GET
+      - POST
+      - OPTIONS
+    allowed_headers:
+      - Content-Type
+      - Authorization
+      - X-API-Token
+
+# Input Validation
+validation:
+  max_query_length: 10000      # Maximum query length
+  max_request_size: 10485760   # Maximum request size (10MB)
+  
+  # Blocked patterns (regex)
+  blocked_patterns:
+    - "(?i)(exec|execute)\\s*\\("
+    - "(?i)<script[^>]*>"
+    - "(?i)javascript:"
