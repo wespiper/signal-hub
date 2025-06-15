@@ -1,0 +1,110 @@
+# Signal Hub Documentation
+site_name: Signal Hub
+site_description: Intelligent MCP server that extends Claude's context through RAG while optimizing costs
+site_url: https://docs.signalhub.ai
+repo_url: https://github.com/wespiper/signal-hub
+repo_name: wespiper/signal-hub
+
+# Theme Configuration
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+  - minify:
+      minify_html: true
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - First Project: getting-started/first-project.md
+    - Core Concepts: getting-started/concepts.md
+  - User Guide:
+    - Configuration: user-guide/configuration.md
+    - Indexing: user-guide/indexing.md
+    - Searching: user-guide/searching.md
+    - Routing: user-guide/routing.md
+    - Caching: user-guide/caching.md
+    - Security: user-guide/security.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Components: architecture/components.md
+    - Plugins: architecture/plugins.md
+    - Data Flow: architecture/data-flow.md
+  - API Reference:
+    - MCP Tools: api-reference/mcp-tools.md
+    - Configuration: api-reference/configuration.md
+    - Plugin API: api-reference/plugins.md
+  - Troubleshooting:
+    - Common Issues: troubleshooting/common-issues.md
+    - Debugging: troubleshooting/debugging.md
+    - Performance: troubleshooting/performance.md
+    - FAQ: troubleshooting/faq.md
+  - Contributing:
+    - Development Setup: contributing/development.md
+    - Testing: contributing/testing.md
+    - Pull Requests: contributing/pull-requests.md
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/wespiper/signal-hub
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/signalhub
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/signalhubai
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+  version:
+    provider: mike

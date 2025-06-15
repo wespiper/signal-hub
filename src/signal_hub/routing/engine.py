@@ -12,6 +12,7 @@ from signal_hub.routing.rules.length import LengthBasedRule
 from signal_hub.routing.rules.complexity import ComplexityBasedRule
 from signal_hub.routing.rules.task_type import TaskTypeRule
 from signal_hub.routing.providers.base import ModelProvider
+from signal_hub.routing.escalation.escalator import EscalationManager
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ class RoutingEngine:
         provider: ModelProvider,
         rules: Optional[List[RoutingRule]] = None,
         default_model: ModelType = ModelType.OPUS,
-        metrics: Optional[RoutingMetrics] = None
+        metrics: Optional[RoutingMetrics] = None,
+        escalation_manager: Optional[EscalationManager] = None
     ):
         """Initialize routing engine.
         
@@ -33,11 +35,13 @@ class RoutingEngine:
             rules: List of routing rules (or use defaults)
             default_model: Default model when no rules match
             metrics: Metrics collector
+            escalation_manager: Escalation manager (or create default)
         """
         self.provider = provider
         self.rules = rules or self._create_default_rules()
         self.default_model = default_model
         self.metrics = metrics or RoutingMetrics()
+        self.escalation_manager = escalation_manager or EscalationManager()
         
         # Sort rules by priority
         self.rules.sort()
@@ -55,24 +59,26 @@ class RoutingEngine:
             LengthBasedRule(priority=10),
         ]
         
-    def route(self, query: Query) -> ModelSelection:
+    def route(self, query: Query, session_id: Optional[str] = None) -> ModelSelection:
         """Route query to appropriate model.
         
         Args:
             query: Query to route
+            session_id: Optional session identifier
             
         Returns:
             Model selection with reasoning
         """
         start_time = datetime.utcnow()
         
-        # Check for manual override
-        if query.preferred_model:
-            logger.info(f"Using preferred model: {query.preferred_model}")
+        # Check for escalation (includes preferred_model check)
+        escalation = self.escalation_manager.check_escalation(query, session_id)
+        if escalation:
+            logger.info(f"Escalation: {escalation.model.display_name} from {escalation.source}")
             selection = ModelSelection(
-                model=query.preferred_model,
+                model=escalation.model,
                 overridden=True,
-                override_reason="User preference"
+                override_reason=escalation.reason or f"Escalation: {escalation.source}"
             )
             self.metrics.record_decision(selection)
             return selection
