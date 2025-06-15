@@ -91,7 +91,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Link Checker
-      uses: lycheeverse/lychee-action@v1
+      uses: lycheeverse/lychee-action@v2
       with:
         # Check all markdown and yaml files
         args: --verbose --no-progress --accept 200,204,301,302 './**/*.md' './**/*.yaml' './**/*.yml'
