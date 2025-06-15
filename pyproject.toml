@@ -2,11 +2,11 @@
 name = "signal-hub"
 version = "0.1.0"
 description = "Intelligent developer assistant that extends Claude's context through MCP+RAG"
-authors = ["Your Name <you@example.com>"]
+authors = ["Signal Hub Contributors <maintainers@signalhub.ai>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/yourusername/signal-hub"
-repository = "https://github.com/yourusername/signal-hub"
+homepage = "https://github.com/wespiper/signal-hub"
+repository = "https://github.com/wespiper/signal-hub"
 keywords = ["mcp", "claude", "ai", "rag", "developer-tools"]
 classifiers = [
     "Development Status :: 3 - Alpha",

@@ -27,7 +27,7 @@ Signal Hub is part of the Signal ecosystem, serving as the central convergence p
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/signal-hub.git
+git clone https://github.com/wespiper/signal-hub.git
 cd signal-hub
 ```
 

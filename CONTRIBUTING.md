@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ### Reporting Issues
 
-1. Check if the issue already exists in our [issue tracker](https://github.com/yourusername/signal-hub/issues)
+1. Check if the issue already exists in our [issue tracker](https://github.com/wespiper/signal-hub/issues)
 2. If not, create a new issue with:
    - Clear title and description
    - Steps to reproduce (if applicable)
@@ -38,7 +38,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/signal-hub.git
+git clone https://github.com/wespiper/signal-hub.git
 cd signal-hub
 
 # Install development dependencies

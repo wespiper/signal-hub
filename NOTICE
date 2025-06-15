@@ -1,0 +1,43 @@
+Signal Hub
+Copyright 2024 Signal Hub Contributors
+
+This project includes software developed by the Signal Hub Contributors.
+Licensed under the MIT License.
+
+Third-Party Software
+====================
+
+This project incorporates the following third-party software:
+
+1. MCP (Model Context Protocol) SDK
+   - Copyright: Anthropic
+   - License: Apache 2.0
+   - Source: https://github.com/anthropics/mcp-python
+
+2. ChromaDB
+   - Copyright: Chroma Inc.
+   - License: Apache 2.0
+   - Source: https://github.com/chroma-core/chroma
+
+3. OpenAI Python Library
+   - Copyright: OpenAI
+   - License: MIT
+   - Source: https://github.com/openai/openai-python
+
+4. Anthropic Python Library
+   - Copyright: Anthropic
+   - License: MIT
+   - Source: https://github.com/anthropics/anthropic-sdk-python
+
+5. Pydantic
+   - Copyright: Samuel Colvin
+   - License: MIT
+   - Source: https://github.com/pydantic/pydantic
+
+6. Tree-sitter
+   - Copyright: Max Brunsfeld
+   - License: MIT
+   - Source: https://github.com/tree-sitter/tree-sitter
+
+For complete license information, see the LICENSE file in each package's
+distribution or repository.
