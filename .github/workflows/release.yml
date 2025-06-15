@@ -205,7 +205,7 @@ jobs:
         echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ needs.validate.outputs.version }}"
     
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ needs.validate.outputs.version }}
         name: Signal Hub v${{ needs.validate.outputs.version }}
