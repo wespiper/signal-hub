@@ -6,19 +6,24 @@
 *Already detailed in sprint-01-detailed.md*
 
 ### Sprint 2: RAG Implementation
-**Goal**: Implement a working semantic search system that can retrieve relevant code context
+**Goal**: Implement a working semantic search system that can retrieve relevant code context with proper abstractions and metadata support
 
 **Key Deliverables**:
 - Semantic search functionality with vector similarity
 - Intelligent chunking strategies for different file types
 - Context assembly that maintains code coherence
 - Initial MCP tool implementations (search_code, explain_code)
+- **NEW**: Metadata extraction system for enhanced search
+- **NEW**: Database abstraction layer for future scaling
+- **NEW**: Batch processing for 5x embedding performance
 
 **Success Metrics**:
 - Retrieve relevant code snippets with >80% accuracy
 - Context assembly maintains syntactic validity
 - Response time <2 seconds for searches
 - All MCP tools responding correctly
+- **NEW**: 5x improvement in embedding generation throughput
+- **NEW**: Metadata enriching search results
 
 **High-Level Tasks**:
 - Implement similarity search algorithms
@@ -26,6 +31,9 @@
 - Build chunk reassembly logic
 - Implement MCP tool handlers
 - Create search result formatting
+- **NEW**: Extract and store code metadata (functions, classes, imports)
+- **NEW**: Create database abstraction interfaces
+- **NEW**: Optimize embedding generation with batching
 
 ---
 
@@ -37,12 +45,15 @@
 - Semantic caching with similarity matching
 - Manual escalation mechanism
 - Cost tracking and reporting
+- **PLANNED**: Cache performance monitoring
+- **PLANNED**: Security foundations (API keys, rate limiting)
 
 **Success Metrics**:
 - 70% of queries routed to Haiku (cost savings)
 - Cache hit rate >60% for similar queries
 - <5% user escalation rate
 - Cost reduction of 50% vs always using Opus
+- **PLANNED**: Real-time cache performance visibility
 
 **High-Level Tasks**:
 - Build complexity assessment algorithm
@@ -50,6 +61,8 @@
 - Create semantic cache with similarity threshold
 - Add escalation command
 - Build cost tracking dashboard
+- **PLANNED**: Add cache eviction strategies
+- **PLANNED**: Implement basic security layer
 
 ---
 
@@ -61,12 +74,15 @@
 - Example configurations and tutorials
 - Performance optimizations
 - Community launch materials
+- **PLANNED**: Production migration documentation
+- **PLANNED**: Performance benchmarking suite
 
 **Success Metrics**:
 - Documentation covers all use cases
 - Setup time <10 minutes for new users
 - Performance meets all benchmarks
 - GitHub repository ready for public
+- **PLANNED**: Clear path from dev to production
 
 **High-Level Tasks**:
 - Write installation and configuration guides
@@ -74,6 +90,8 @@
 - Optimize query performance
 - Prepare launch blog post
 - Set up community channels (Discord, etc.)
+- **PLANNED**: Document ChromaDB to pgvector migration
+- **PLANNED**: Create performance testing framework
 
 ---
 
