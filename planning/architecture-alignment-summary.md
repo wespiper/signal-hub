@@ -37,7 +37,9 @@ This document summarizes the alignment between the Signal Hub system design and 
 
 | Component | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Status |
 |-----------|----------|----------|----------|----------|---------|
-| MCP Server | 🟨 Basic | ✅ Complete | - | - | ✅ Covered |
+| MCP Server | 🟨 Basic + Plugins | ✅ Complete | - | - | ✅ Covered |
+| Plugin System | ✅ Implemented | - | - | - | ✅ Covered |
+| Feature Flags | ✅ Implemented | - | - | - | ✅ Covered |
 | Indexing Pipeline | 🟨 Foundation | ✅ Complete | - | - | ✅ Covered |
 | Retrieval System | 🟨 Storage | ✅ Search | - | - | ✅ Covered |
 | Model Routing | - | - | ✅ Complete | - | ✅ Covered |

@@ -1,0 +1,21 @@
+# Signal Hub Code Owners
+# This file defines who is responsible for code in this repository
+
+# Default owners for everything in the repo
+* @wespiper
+
+# Core MCP server implementation
+/src/signal_hub/core/ @wespiper
+
+# Plugin system (Pro/Enterprise features)
+/src/signal_hub/plugins/ @wespiper
+
+# Documentation
+/docs/ @wespiper
+*.md @wespiper
+
+# CI/CD and GitHub configuration
+/.github/ @wespiper
+
+# Planning and architecture
+/planning/ @wespiper

@@ -1,32 +1,43 @@
 # Signal Hub Sprint Overview
 
+## 🎯 Updated Strategy: Hybrid Open Source Model
+
+**Signal Hub Basic** (Open Source) - Core MCP functionality with basic RAG and routing  
+**Signal Hub Pro/Enterprise** - Advanced ML-powered features via plugin architecture  
+**Early Access Program** - All features available during beta for feedback (set `SIGNAL_HUB_EARLY_ACCESS=true`)
+
 ## Sprint Structure
 Based on the implementation roadmap, we'll organize the project into 4 major phases with 16 weekly sprints.
 
-## Phase 1: Open Source Foundation (Sprints 1-4)
-**Goal**: Launch production-ready open source Signal Hub MCP server with demonstrable cost savings
+## Phase 1: Open Source Foundation (Sprints 1-4) - Signal Hub Basic
+**Goal**: Launch production-ready Signal Hub Basic with plugin architecture for future Pro features
 
 ### Sprint 1: Core Infrastructure ✓
-- Set up open source repository
+- Set up open source repository with hybrid model support
+- **NEW**: Implement plugin architecture for extensibility
+- **NEW**: Create feature flags system for edition management
 - Implement basic MCP server framework
 - Create codebase scanning pipeline
 - Basic embedding generation
 - Development environment and CI/CD
 
 ### Sprint 2: RAG Implementation (Enhanced)
-- Semantic search and retrieval
+- Semantic search and retrieval (basic implementation)
 - Chunking strategies for different file types
 - Context assembly and ranking
 - Initial MCP tool implementations
 - **NEW**: Metadata extraction system
-- **NEW**: Database abstraction layer
+- **NEW**: Database abstraction layer (supports ChromaDB + future pgvector)
 - **NEW**: Batch processing optimization
+- **Plugin Hook**: Advanced retrieval strategies for Pro edition
 
 ### Sprint 3: Model Routing & Caching
-- Rule-based routing logic
+- Rule-based routing logic (Signal Hub Basic)
+- **Plugin Hook**: ML-powered routing for Pro edition
 - Semantic caching implementation
 - Manual escalation mechanism
-- Cost tracking and reporting
+- Basic cost tracking and reporting
+- **Plugin Hook**: Advanced analytics for Pro edition
 - Cache performance monitoring
 - Security foundations
 
@@ -39,7 +50,7 @@ Based on the implementation roadmap, we'll organize the project into 4 major pha
 - Performance benchmarking
 
 ## Phase 2: Community & Intelligence (Sprints 5-8)
-**Goal**: Build active community and develop proprietary intelligence layer
+**Goal**: Launch Signal Hub Basic to community, develop Pro features as plugins during early access
 
 ### Sprint 5: Community Building
 - Developer outreach
@@ -53,11 +64,13 @@ Based on the implementation roadmap, we'll organize the project into 4 major pha
 - Performance optimizations
 - Multi-language support
 
-### Sprint 7: Proprietary Intelligence Development
-- ML-powered routing system
-- User feedback collection
-- Complexity assessment algorithms
+### Sprint 7: Pro Features Development (Early Access)
+- ML-powered routing system (Pro plugin)
+- User feedback collection infrastructure
+- Complexity assessment algorithms (Pro plugin)
 - A/B testing framework
+- Learning algorithms (Pro plugin)
+- Advanced cost optimization (Pro plugin)
 
 ### Sprint 8: Cost Savings Measurement
 - Detailed cost tracking
@@ -66,13 +79,15 @@ Based on the implementation roadmap, we'll organize the project into 4 major pha
 - Monetization preparation
 
 ## Phase 3: Monetization Launch (Sprints 9-12)
-**Goal**: Launch paid tiers with proven value proposition
+**Goal**: Launch Signal Hub Pro ($29/mo + 15% of savings) and Enterprise tiers
 
 ### Sprint 9: Pro Tier Development
-- Advanced routing algorithms
+- Package Pro plugins into licensed distribution
+- Advanced routing algorithms (ML-based)
 - Learning system implementation
-- Analytics dashboard
-- Billing integration
+- Analytics dashboard (detailed cost savings)
+- Billing integration (usage-based + savings share)
+- License key system for Pro features
 
 ### Sprint 10: Beta Testing
 - Private beta program

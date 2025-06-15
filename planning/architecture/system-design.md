@@ -3,7 +3,18 @@
 ## Overview
 Signal Hub is an MCP server that provides intelligent context retrieval and model routing for Claude Code, optimizing costs while maintaining quality.
 
+### 🎯 Hybrid Open Source Model
+- **Signal Hub Basic** (Open Source): Core MCP functionality with basic routing and caching
+- **Signal Hub Pro/Enterprise**: Advanced ML-powered features via plugin architecture
+- **Plugin System**: Extensible design allowing Pro features to be added without modifying core
+
 ## Core Components
+
+### 0. Plugin Architecture (NEW)
+- **Plugin Manager**: Loads and manages plugin lifecycle
+- **Plugin Interfaces**: ModelRouter, CacheStrategy, AnalyticsProvider
+- **Feature Flags**: Edition-based feature availability
+- **Plugin Registry**: Discovers and registers available plugins
 
 ### 1. MCP Server Layer
 - **SignalHubServer**: Main server class handling MCP protocol
@@ -24,16 +35,17 @@ Signal Hub is an MCP server that provides intelligent context retrieval and mode
 - **Context Assembly**: Builds coherent context from chunks
 - **Ranking Engine**: Orders results by relevance
 
-### 4. Model Routing
-- **Complexity Assessor**: Analyzes query and context complexity
-- **Routing Engine**: Selects appropriate model (Haiku/Sonnet/Opus)
+### 4. Model Routing (Plugin-Based)
+- **Basic Router** (Signal Hub Basic): Rule-based model selection
+- **ML Router** (Pro Plugin): ML-powered complexity assessment
+- **Routing Engine**: Plugin-based architecture for extensibility
 - **Cost Tracker**: Monitors token usage and costs
 - **Escalation Handler**: Manages manual model upgrades
 
-### 5. Caching Layer
-- **Semantic Cache**: Stores query-response pairs
-- **Similarity Matcher**: Finds cached responses for similar queries
-- **Cache Manager**: Handles eviction and updates
+### 5. Caching Layer (Plugin-Based)
+- **Basic Cache** (Signal Hub Basic): Simple semantic caching
+- **Advanced Cache** (Pro Plugin): ML-optimized caching strategies
+- **Cache Manager**: Plugin-based cache strategy selection
 - **Performance Monitor**: Tracks cache hit rates
 
 ## Data Flow
@@ -53,9 +65,12 @@ Signal Hub is an MCP server that provides intelligent context retrieval and mode
 ## Key Design Decisions
 
 ### Modularity
+- **NEW**: Plugin architecture for all major components
+- **NEW**: Feature flags for edition-based functionality
 - Plugin architecture for parsers and embedders
 - Swappable vector stores and cache backends
 - Extensible tool system
+- **NEW**: Clear separation between Basic and Pro features
 
 ### Performance
 - Async/await for concurrent operations
@@ -74,6 +89,8 @@ Signal Hub is an MCP server that provides intelligent context retrieval and mode
 - API key management
 - Rate limiting per user/project
 - Audit logging for enterprise
+- **NEW**: License key validation for Pro features
+- **NEW**: Feature access control based on edition
 
 ## Technology Choices
 

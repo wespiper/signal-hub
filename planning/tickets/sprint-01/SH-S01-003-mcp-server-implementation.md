@@ -21,7 +21,7 @@ The MCP server is the core of Signal Hub - it's how we communicate with Claude C
 - **Business Value**: Core product functionality operational
 
 ## Description
-Implement a basic MCP (Model Context Protocol) server that can handle connections from Claude Code, respond to protocol messages, and list available tools. This is the foundation that all other features will build upon.
+Implement a basic MCP (Model Context Protocol) server that can handle connections from Claude Code, respond to protocol messages, and list available tools. This server must integrate with the plugin architecture to support both Signal Hub Basic features and future Pro/Enterprise features through plugins.
 
 ## Acceptance Criteria
 - [ ] **Functional**: MCP server starts and accepts connections
@@ -33,7 +33,9 @@ Implement a basic MCP (Model Context Protocol) server that can handle connection
 
 ### Architecture/Design
 - Async Python server using MCP SDK
-- Configuration-driven setup
+- **Plugin-based architecture** for extensibility
+- **Feature flags integration** for edition management
+- Configuration-driven setup (supports Basic/Pro/Enterprise)
 - Extensible tool registration system
 - Structured logging for debugging
 
@@ -49,10 +51,10 @@ Phase 2: Protocol Handler (Day 2)
   - Output: Valid protocol responses
   - Risk: Protocol compliance
 
-Phase 3: Tool System (Day 3)
-  - Task: Create tool registration
-  - Output: Tools listed in Claude
-  - Risk: Tool format issues
+Phase 3: Tool System & Plugins (Day 3)
+  - Task: Create tool registration with plugin support
+  - Output: Tools listed in Claude, plugin hooks ready
+  - Risk: Tool format issues, plugin interface complexity
 
 Phase 4: Configuration (Day 4)
   - Task: Add config system
@@ -70,12 +72,14 @@ Phase 5: Testing (Day 5)
 src/signal_hub/
 ├── core/
 │   ├── __init__.py
-│   ├── server.py         # Main MCP server
+│   ├── server.py         # Main MCP server with plugin support
 │   ├── protocol.py       # Protocol handling
-│   └── tools.py          # Tool registry
+│   ├── tools.py          # Tool registry
+│   ├── plugins.py        # Plugin system (ALREADY IMPLEMENTED)
+│   └── features.py       # Feature flags (ALREADY IMPLEMENTED)
 ├── config/
 │   ├── __init__.py
-│   ├── settings.py       # Configuration classes
+│   ├── settings.py       # Configuration classes with edition support
 │   └── loader.py         # Config file loading
 └── utils/
     ├── __init__.py
@@ -113,22 +117,29 @@ src/signal_hub/
 
 ### Demo Scenarios
 ```python
-# Start the server
+# Start the server (Signal Hub Basic)
 signal-hub serve --config dev.yaml
+
+# Start with early access (all features enabled)
+SIGNAL_HUB_EARLY_ACCESS=true signal-hub serve --config dev.yaml
 
 # In another terminal, verify it's running
 curl http://localhost:3333/health
 
 # Connect with Claude Code
-# Should see Signal Hub in server list
-# Should see available tools
+# Should see "Signal Hub Basic" in server list
+# Should see available tools based on edition
+# Basic tools: search_codebase, explain_code, etc.
+# Pro tools (early access): ml_route_query, analyze_cost_savings
 ```
 
 ## Definition of Done
 - [ ] MCP server starts without errors
 - [ ] Responds to all required protocol messages
-- [ ] Tool listing works in Claude Code
-- [ ] Configuration system implemented
+- [ ] Tool listing works in Claude Code (edition-aware)
+- [ ] Plugin system integrated
+- [ ] Feature flags working (Basic vs Pro features)
+- [ ] Configuration system implemented with edition support
 - [ ] Comprehensive logging in place
 - [ ] 90% test coverage achieved
 - [ ] Performance benchmarks met
@@ -138,5 +149,7 @@ curl http://localhost:3333/health
 ## Notes & Resources
 - **Design Docs**: [MCP Protocol Specification](https://github.com/anthropics/mcp)
 - **Partner Context**: Must be compatible with Claude Code
-- **Future Considerations**: Will add tools in Sprint 2
+- **Future Considerations**: Will add tools in Sprint 2, Pro features as plugins in Sprint 5-8
 - **Learning Resources**: [MCP Python SDK Docs](https://github.com/anthropics/mcp-python)
+- **Edition Notes**: This ticket implements Signal Hub Basic functionality with hooks for Pro/Enterprise features
+- **Plugin Architecture**: Already implemented in src/signal_hub/core/plugins.py

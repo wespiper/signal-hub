@@ -3,13 +3,20 @@
 ## Project Overview
 Signal Hub is an MCP server that extends Claude's context through RAG while optimizing costs via intelligent model routing. This document summarizes the implementation plan.
 
+### 🎯 Hybrid Open Source Model
+- **Signal Hub Basic** (MIT License): Core functionality available to all
+- **Signal Hub Pro/Enterprise**: Advanced ML features for teams and organizations  
+- **Early Access Program**: All features free during beta (set `SIGNAL_HUB_EARLY_ACCESS=true`)
+- **Plugin Architecture**: Extensible design supporting both open and proprietary features
+
 ## Sprint Structure
 
 ### Phase 1: Open Source Foundation (Weeks 1-4)
-**Sprint 1**: Core Infrastructure
+**Sprint 1**: Core Infrastructure (�︡ Signal Hub Basic)
 - 10 detailed tickets with subtasks
 - Focus: MCP server, codebase scanning, embeddings
-- Deliverable: Working prototype that can index code
+- Deliverable: Working Signal Hub Basic with plugin system
+- **New**: Plugin architecture for future Pro features
 
 **Sprint 2**: RAG Implementation  
 - Semantic search and retrieval
@@ -27,10 +34,15 @@ Signal Hub is an MCP server that extends Claude's context through RAG while opti
 - Community preparation
 
 ### Phase 2: Community & Intelligence (Weeks 5-8)
-Building community and developing proprietary ML features
+- Launch Signal Hub Basic to build community
+- Develop ML-powered routing and analytics as plugins
+- **Early Access Program**: Gather feedback on Pro features
+- Measure actual cost savings to validate pricing
 
 ### Phase 3: Monetization (Weeks 9-12)
-Pro tier launch with proven value proposition
+- Launch Signal Hub Pro ($29/mo + 15% of savings)
+- Keep Signal Hub Basic free and open source
+- Enterprise tier for large organizations
 
 ### Phase 4: Enterprise & Scale (Weeks 13-16)
 Enterprise features and platform expansion
@@ -64,6 +76,8 @@ Enterprise features and platform expansion
 2. Set up development environment (SH-008)
 3. Start with SH-001 and SH-002 (foundation)
 4. Follow testing strategy for all code
+5. Use plugin system for new features
+6. Enable early access mode for Pro features testing
 
 ### For Project Managers:
 1. Use sprint goals for planning
@@ -76,6 +90,9 @@ Enterprise features and platform expansion
 3. Align with architecture decisions
 
 ## Success Criteria for Sprint 1
+- [✓] Repository setup with hybrid model support
+- [✓] Plugin architecture implemented
+- [✓] Feature flags for edition management
 - [ ] MCP server connects to Claude Code
 - [ ] Can scan and index a codebase
 - [ ] Embeddings generated and stored

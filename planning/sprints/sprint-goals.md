@@ -1,21 +1,68 @@
 # Signal Hub Sprint Goals (Sprints 2-16)
 
-## Phase 1: Open Source Foundation (Sprints 1-4)
+This document outlines the development roadmap for Signal Hub, clearly distinguishing between features for each edition:
+
+## Edition Overview
+
+### Signal Hub Basic (Open Source) - Sprints 1-4
+- ✅ Core MCP server integration
+- ✅ Codebase indexing and semantic search
+- ✅ Simple rule-based routing (Haiku/Sonnet/Opus)
+- ✅ Basic semantic caching
+- ✅ Manual escalation mechanism
+- ✅ Basic cost tracking and analytics
+- ✅ Zero configuration with sensible defaults
+- ✅ Local storage with ChromaDB
+- ✅ Community support
+
+### Signal Hub Pro ($29/month + 15% of savings above $100) - Sprints 5-8
+- 🚀 ML-powered intelligent routing (70%+ cost savings)
+- 🚀 Learning algorithms from user feedback
+- 🚀 Personalized routing patterns
+- 🚀 Smart semantic deduplication
+- 🚀 Predictive caching
+- 📊 Detailed analytics and ROI dashboard
+- 🔌 REST API for custom integrations
+- 🔌 Custom model support
+- 🏆 Priority support
+
+### Signal Hub Enterprise (Custom Pricing) - Sprints 9-12
+- 👥 Team management and collaboration
+- 🔐 SSO integration (SAML/OIDC)
+- 🔐 Advanced security and audit logging
+- 🏢 Custom deployment options
+- 🏢 Dedicated support with SLA
+- 🏢 Professional services
+- 📊 Custom reports and dashboards
+- 💰 10% of cost savings (volume discount)
+
+### Early Access Program
+- 🎁 All Pro and Enterprise features FREE during development
+- 🎁 Direct input on product development
+- 🎁 Join by setting `SIGNAL_HUB_EARLY_ACCESS=true`
+- 🎁 Discounted pricing when we launch
+
+## Phase 1: Signal Hub Basic - Open Source Foundation (Sprints 1-4)
 
 ### Sprint 1: Core Infrastructure ✓
 *Already detailed in sprint-01-detailed.md*
 
+**Edition**: Signal Hub Basic (Open Source)
+
 ### Sprint 2: RAG Implementation
 **Goal**: Implement a working semantic search system that can retrieve relevant code context with proper abstractions and metadata support
 
+**Edition**: Signal Hub Basic (Open Source)
+
 **Key Deliverables**:
-- Semantic search functionality with vector similarity
-- Intelligent chunking strategies for different file types
-- Context assembly that maintains code coherence
-- Initial MCP tool implementations (search_code, explain_code)
-- **NEW**: Metadata extraction system for enhanced search
-- **NEW**: Database abstraction layer for future scaling
-- **NEW**: Batch processing for 5x embedding performance
+- ✅ Semantic search functionality with vector similarity
+- ✅ Intelligent chunking strategies for different file types
+- ✅ Context assembly that maintains code coherence
+- ✅ Initial MCP tool implementations (search_code, explain_code)
+- ✅ Metadata extraction system for enhanced search
+- ✅ Database abstraction layer for future scaling
+- ✅ Batch processing for 5x embedding performance
+- ✅ Basic RAG functionality
 
 **Success Metrics**:
 - Retrieve relevant code snippets with >80% accuracy
@@ -38,44 +85,49 @@
 ---
 
 ### Sprint 3: Model Routing & Caching
-**Goal**: Implement intelligent model routing and caching to optimize costs without sacrificing quality
+**Goal**: Implement simple rule-based model routing and basic caching to optimize costs (Basic edition features only)
+
+**Edition**: Signal Hub Basic (Open Source)
 
 **Key Deliverables**:
-- Rule-based routing engine (Haiku vs Sonnet vs Opus)
-- Semantic caching with similarity matching
-- Manual escalation mechanism
-- Cost tracking and reporting
-- **PLANNED**: Cache performance monitoring
-- **PLANNED**: Security foundations (API keys, rate limiting)
+- ✅ Simple rule-based routing engine (Haiku vs Sonnet vs Opus)
+- ✅ Basic semantic caching with similarity matching
+- ✅ Manual escalation mechanism
+- ✅ Basic cost tracking and reporting
+- ✅ Zero configuration defaults
+- ✅ Local storage with ChromaDB
+- ✅ Security foundations (API keys, rate limiting)
 
 **Success Metrics**:
-- 70% of queries routed to Haiku (cost savings)
-- Cache hit rate >60% for similar queries
-- <5% user escalation rate
-- Cost reduction of 50% vs always using Opus
-- **PLANNED**: Real-time cache performance visibility
+- 50% of queries routed to Haiku (basic rules)
+- Cache hit rate >40% for similar queries
+- <10% user escalation rate
+- Cost reduction of 30-40% vs always using Opus
 
 **High-Level Tasks**:
-- Build complexity assessment algorithm
-- Implement routing decision logic
+- Build simple rule-based routing (query length, keywords)
+- Implement basic routing decision logic
 - Create semantic cache with similarity threshold
-- Add escalation command
-- Build cost tracking dashboard
-- **PLANNED**: Add cache eviction strategies
-- **PLANNED**: Implement basic security layer
+- Add manual escalation command
+- Build basic cost tracking dashboard
+- Implement cache eviction strategies
+- Add API key management and rate limiting
 
 ---
 
 ### Sprint 4: Polish & Documentation
-**Goal**: Prepare for open source launch with polished UX, comprehensive docs, and community readiness
+**Goal**: Prepare Signal Hub Basic for open source launch with polished UX, comprehensive docs, and community readiness
+
+**Edition**: Signal Hub Basic (Open Source) - Feature Complete
 
 **Key Deliverables**:
-- Comprehensive setup and usage documentation
-- Example configurations and tutorials
-- Performance optimizations
-- Community launch materials
-- **PLANNED**: Production migration documentation
-- **PLANNED**: Performance benchmarking suite
+- ✅ Comprehensive setup and usage documentation
+- ✅ Example configurations and tutorials
+- ✅ Performance optimizations for Basic features
+- ✅ Community launch materials
+- ✅ Simple analytics dashboard
+- ✅ ChromaDB to pgvector migration guide
+- ✅ Performance benchmarking suite
 
 **Success Metrics**:
 - Documentation covers all use cases
@@ -95,199 +147,244 @@
 
 ---
 
-## Phase 2: Community & Intelligence (Sprints 5-8)
+## Phase 2: Signal Hub Pro Development (Sprints 5-8)
 
-### Sprint 5: Community Building
-**Goal**: Launch publicly and build an active open source community
+**Note**: Pro features are developed as plugins on top of Signal Hub Basic. Early Access Program provides free access during development.
+
+### Sprint 5: Community Launch & Pro Foundation
+**Goal**: Launch Signal Hub Basic publicly and begin Pro tier development
+
+**Edition**: Signal Hub Basic (Launch) + Pro (Foundation)
 
 **Key Deliverables**:
-- Public repository launch
-- Community engagement plan
-- Initial user feedback collection
-- Bug fixes from early users
+- 🚀 Public repository launch for Signal Hub Basic
+- 🚀 Community engagement plan
+- 🚀 Early Access Program launch
+- 🔧 Pro plugin architecture foundation
+- 🔧 Initial ML routing experiments
+- 🔧 Advanced analytics framework
 
 **Success Metrics**:
 - 100+ GitHub stars in first week
-- 20+ developers trying the tool
+- 20+ developers trying Signal Hub Basic
+- 10+ Early Access signups for Pro features
 - <24hr response to issues
 - First external contributor
 
 **High-Level Tasks**:
-- Execute launch plan
-- Monitor and respond to feedback
-- Fix critical bugs quickly
-- Create contributor guidelines
-- Host initial community call
+- Execute Basic edition launch plan
+- Set up Early Access Program
+- Design Pro plugin system
+- Begin ML model training for routing
+- Create analytics data pipeline
+- Fix critical bugs from community
 
 ---
 
-### Sprint 6: Enhanced Open Source Features
-**Goal**: Improve core features based on community feedback
+### Sprint 6: ML-Powered Routing (Pro)
+**Goal**: Implement intelligent ML-powered routing for Pro tier
+
+**Edition**: Signal Hub Pro (Early Access)
 
 **Key Deliverables**:
-- Advanced chunking strategies
-- Better context synthesis
-- Multi-language support expansion
-- Performance optimizations
+- 🤖 ML model for complexity assessment
+- 🤖 Learning algorithms from user feedback
+- 🤖 Personalized routing patterns
+- 🤖 Advanced cost optimization (70%+ savings)
+- 📊 Detailed analytics dashboard
+- 📊 ROI tracking and reporting
 
 **Success Metrics**:
-- Support for 10+ programming languages
-- 2x performance improvement
-- Context quality score >90%
-- User satisfaction increase
-
-**High-Level Tasks**:
-- Implement AST-based chunking
-- Add language-specific parsers
-- Optimize vector search
-- Improve context ranking
-- Add query explanation feature
-
----
-
-### Sprint 7: Proprietary Intelligence Development
-**Goal**: Build ML-powered routing system for the Pro tier
-
-**Key Deliverables**:
-- ML model for complexity assessment
-- User feedback collection system
-- A/B testing framework
-- Learning algorithms
-
-**Success Metrics**:
-- ML routing 20% better than rules
-- Feedback collection from 50% of queries
-- A/B test infrastructure working
-- Cost savings improved by 10%
+- ML routing 30% better than basic rules
+- Cost savings improved to 70%+
+- Learning from 80% of queries
+- Personalization working for users
 
 **High-Level Tasks**:
 - Train complexity assessment model
-- Build feedback UI components
-- Implement A/B testing system
-- Create learning pipeline
-- Design Pro tier features
+- Build feedback collection UI
+- Implement learning pipeline
+- Create personalization engine
+- Build Pro analytics dashboard
+- Integrate with Basic edition seamlessly
 
 ---
 
-### Sprint 8: Cost Savings Measurement
-**Goal**: Validate and measure cost savings to support pricing model
+### Sprint 7: Smart Caching & API (Pro)
+**Goal**: Implement advanced caching and API access for Pro tier
+
+**Edition**: Signal Hub Pro (Early Access)
 
 **Key Deliverables**:
-- Detailed cost analytics
-- ROI calculator
-- Usage pattern analysis
-- Pricing model validation
+- ⚡ Smart semantic deduplication
+- ⚡ Predictive caching algorithms
+- ⚡ Cross-project cache sharing
+- 🔌 REST API for custom integrations
+- 🔌 Custom model support framework
+- 🔌 Webhook integrations
 
 **Success Metrics**:
-- Track costs per user/project
-- Demonstrate 70%+ savings
-- Clear ROI metrics
-- Pricing model validated
+- Cache hit rate improved to 80%+
+- API handling 1000+ requests/min
+- Custom models integrated
+- Smart deduplication saving 20%+ storage
 
 **High-Level Tasks**:
-- Build analytics dashboard
-- Create cost comparison reports
-- Analyze usage patterns
-- Survey users on value
-- Finalize Pro tier pricing
+- Implement advanced cache algorithms
+- Build REST API with auth
+- Create custom model framework
+- Add webhook system
+- Optimize cache performance
+- Document API extensively
 
 ---
 
-## Phase 3: Monetization Launch (Sprints 9-12)
+### Sprint 8: Pro Tier Polish & Pricing
+**Goal**: Finalize Pro tier features and validate pricing model
 
-### Sprint 9: Pro Tier Development
-**Goal**: Build premium features for the Pro tier
+**Edition**: Signal Hub Pro (Beta)
 
 **Key Deliverables**:
-- Advanced ML routing
-- Learning system from feedback
-- Premium analytics dashboard
-- Subscription management
+- 💰 Pricing validation with Early Access users
+- 💰 Payment integration (Stripe)
+- 💰 License key system
+- 📈 Performance benchmarks vs Basic
+- 📈 ROI calculator and reports
+- 🏆 Priority support system
 
 **Success Metrics**:
-- ML routing reduces costs by additional 20%
-- Learning system improving daily
-- Analytics providing actionable insights
-- Billing system functional
+- 70%+ cost savings demonstrated
+- $29/month + 15% validated with users
+- 20+ beta users ready to pay
+- Clear ROI metrics proven
 
 **High-Level Tasks**:
-- Implement advanced routing algorithms
-- Build feedback learning pipeline
-- Create analytics visualizations
+- Validate pricing with Early Access users
 - Integrate Stripe billing
-- Add license key system
+- Build license key system
+- Create detailed benchmarks
+- Set up priority support
+- Prepare Pro launch materials
 
 ---
 
-### Sprint 10: Beta Testing
-**Goal**: Validate Pro features with beta users
+## Phase 3: Monetization & Enterprise (Sprints 9-12)
+
+**Pricing Model**: Pro = $29/month + 15% of savings above $100/month
+
+### Sprint 9: Pro Tier Public Launch
+**Goal**: Launch Signal Hub Pro publicly with full monetization
+
+**Edition**: Signal Hub Pro (GA)
 
 **Key Deliverables**:
-- Private beta program
-- Customer feedback collection
-- Performance validation
-- Pricing refinement
+- 🚀 Public Pro tier launch
+- 🚀 Marketing website and materials
+- 🚀 Self-serve signup flow
+- 🚀 Billing and subscription management
+- 🚀 Documentation and tutorials
+- 🚀 Launch campaign execution
 
 **Success Metrics**:
-- 20+ beta users
-- 80% willing to pay
-- No critical issues
-- Pricing validated
+- 50+ paying customers in week 1
+- $10K MRR in month 1
+- <5% churn rate
+- Positive ROI for all customers
 
 **High-Level Tasks**:
-- Recruit beta users
-- Onboard and support beta users
-- Collect detailed feedback
-- Measure actual cost savings
-- Refine features based on feedback
-
----
-
-### Sprint 11: Public Launch
-**Goal**: Launch Pro and Enterprise tiers publicly
-
-**Key Deliverables**:
-- Public pricing page
-- Marketing campaign
-- Sales materials
-- Customer success process
-
-**Success Metrics**:
-- 10 paying customers week 1
-- $5K MRR month 1
-- <5% churn
-- High customer satisfaction
-
-**High-Level Tasks**:
-- Launch marketing campaign
+- Execute launch campaign
 - Enable public signups
-- Create onboarding flow
-- Set up customer support
-- Monitor launch metrics
+- Monitor and support new customers
+- Gather feedback and iterate
+- Scale infrastructure for growth
+- Track key metrics daily
 
 ---
 
-### Sprint 12: Optimization & Scale
-**Goal**: Optimize based on customer feedback and scale infrastructure
+### Sprint 10: Enterprise Foundation
+**Goal**: Begin building Enterprise edition features
+
+**Edition**: Signal Hub Enterprise (Alpha)
 
 **Key Deliverables**:
-- Performance optimizations
-- Feature improvements
-- Infrastructure scaling
-- Enterprise features planning
+- 👥 Team management system
+- 👥 User roles and permissions
+- 🔐 SSO integration (SAML/OIDC)
+- 🔐 Audit logging framework
+- 🏢 Enterprise onboarding flow
+- 🏢 Custom deployment options
 
 **Success Metrics**:
-- Support 100+ customers
-- <100ms p95 latency
-- 99.9% uptime
-- Enterprise pipeline building
+- Team features working end-to-end
+- SSO integration tested
+- Audit logs comprehensive
+- 5+ enterprise leads interested
 
 **High-Level Tasks**:
-- Optimize hot paths
-- Scale infrastructure
-- Improve monitoring
-- Plan enterprise features
-- Build sales pipeline
+- Build RBAC system
+- Implement SAML/OIDC
+- Create audit logging
+- Design enterprise UI
+- Build deployment tools
+- Create enterprise docs
+
+---
+
+### Sprint 11: Enterprise Beta & Growth
+**Goal**: Beta test Enterprise features while growing Pro tier
+
+**Edition**: Signal Hub Enterprise (Beta) + Pro Growth
+
+**Key Deliverables**:
+- 🏢 Enterprise beta program
+- 🏢 Professional services offering
+- 🏢 SLA guarantees
+- 📈 Pro tier growth campaigns
+- 📈 Customer success program
+- 📈 Case studies and testimonials
+
+**Success Metrics**:
+- 3+ enterprise beta customers
+- 200+ Pro customers
+- $50K MRR total
+- Enterprise pricing validated (10% of savings)
+
+**High-Level Tasks**:
+- Run enterprise beta program
+- Build professional services
+- Create growth campaigns
+- Develop case studies
+- Scale customer success
+- Refine enterprise features
+
+---
+
+### Sprint 12: Enterprise Launch & Scale
+**Goal**: Launch Enterprise tier publicly and scale all editions
+
+**Edition**: All Editions (Scaled)
+
+**Key Deliverables**:
+- 🚀 Enterprise tier public launch
+- 🚀 Global infrastructure scaling
+- 🚀 Advanced security certifications
+- 📊 Full edition comparison
+- 📊 Migration paths documented
+- 📊 Success metrics dashboard
+
+**Success Metrics**:
+- 500+ total customers
+- 10+ enterprise customers
+- $100K+ MRR
+- 99.9% uptime achieved
+
+**High-Level Tasks**:
+- Launch Enterprise publicly
+- Scale global infrastructure
+- Achieve security compliance
+- Document all migration paths
+- Build executive dashboards
+- Prepare for next phase
 
 ---
 
@@ -391,21 +488,27 @@
 
 ## Cross-Sprint Themes
 
+### Edition Development Strategy:
+1. **Sprints 1-4**: Build Signal Hub Basic as a solid open source foundation
+2. **Sprints 5-8**: Develop Pro features as plugins, maintaining Basic/Pro separation
+3. **Sprints 9-12**: Add Enterprise features while growing Pro customer base
+4. **Sprints 13-16**: Advanced features and global scale
+
 ### Continuous Throughout All Sprints:
-1. **Security**: Regular security audits and improvements
-2. **Performance**: Ongoing optimization and benchmarking
-3. **Quality**: Comprehensive testing and bug fixes
-4. **Documentation**: Keep docs up-to-date with features
-5. **Community**: Engage with and support community
+1. **Open Source First**: Basic edition always free and fully functional
+2. **Plugin Architecture**: Pro/Enterprise features as clean add-ons
+3. **Community Building**: Engage with and support open source users
+4. **Quality & Testing**: Comprehensive testing across all editions
+5. **Documentation**: Separate docs for each edition's features
 
-### Technical Debt Management:
-- Allocate 20% of each sprint to technical debt
-- Regular refactoring sessions
-- Dependency updates
-- Code quality improvements
+### Monetization Philosophy:
+- **Basic**: Always free, community-driven
+- **Pro**: $29/month + 15% of savings above $100 (pay when you save)
+- **Enterprise**: Custom pricing, 10% of savings (volume discount)
+- **Early Access**: Free Pro/Enterprise features during development
 
-### Innovation Time:
-- 10% time for experimentation
-- Hackathons between phases
-- Research new technologies
-- Prototype future features
+### Technical Excellence:
+- 20% of each sprint for technical debt
+- Performance benchmarks for each edition
+- Security audits before each tier launch
+- Clear upgrade paths between editions

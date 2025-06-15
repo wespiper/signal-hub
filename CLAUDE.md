@@ -17,15 +17,27 @@ Take the role of a senior principal engineer. Prioritize:
 
 **Signal Hub** is an intelligent MCP server that extends Claude's context through RAG (Retrieval-Augmented Generation) while optimizing costs via smart model routing and caching. It enables unlimited effective context for Claude Code through semantic search of codebases.
 
-**Current Status**: Sprint 1 (Core Infrastructure) - Building foundation with MCP server, indexing, and vector storage.
+### 🎯 Hybrid Open Source Model
+- **Signal Hub Basic** (Open Source): Core MCP, rule-based routing, basic caching
+- **Signal Hub Pro** ($29/mo + 15% of savings): ML-powered routing, advanced analytics
+- **Signal Hub Enterprise**: Team features, SSO, audit logging
+- **Early Access**: Set `SIGNAL_HUB_EARLY_ACCESS=true` for all features during beta
+
+See `docs/EDITIONS.md` for complete feature comparison.
+
+**Current Status**: Sprint 1 (Core Infrastructure) - Building Signal Hub Basic foundation with plugin architecture for Pro/Enterprise features.
 
 ## Architecture Overview
 
-- **MCP Server**: Handles communication with Claude Code
+- **MCP Server**: Handles communication with Claude Code (with plugin support)
+- **Plugin System**: Extensible architecture for Pro/Enterprise features
+- **Feature Flags**: Edition-based functionality control
 - **Indexing Pipeline**: Scans, parses, and embeds codebases
 - **RAG System**: Retrieves relevant context via semantic search
-- **Model Router**: Intelligently selects Haiku/Sonnet/Opus based on complexity
-- **Cache Layer**: Semantic caching for repeated queries
+- **Model Router**: Rule-based (Basic) or ML-powered (Pro) selection
+- **Cache Layer**: Basic semantic caching (Basic) or smart deduplication (Pro)
+
+See `planning/architecture/system-design.md` for detailed architecture.
 
 ### Core Technology
 
@@ -40,11 +52,16 @@ Take the role of a senior principal engineer. Prioritize:
 ### Step 1: Before Starting Any Task
 
 ```bash
-# Check project status
+# Check project status and edition strategy
 cat planning/README.md
+cat docs/EDITIONS.md
 
 # Review current sprint tickets
 ls planning/tickets/sprint-*/
+
+# Check plugin architecture
+cat src/signal_hub/core/plugins.py
+cat src/signal_hub/core/features.py
 
 # Check implementation status
 find src/ -name "*.py" | xargs grep -l "TODO\|FIXME\|NotImplementedError"
@@ -120,8 +137,11 @@ make format  # Formats code
 make lint    # Checks style
 make type-check  # Type checking
 
-# Start development server
+# Start development server (Signal Hub Basic)
 signal-hub serve --config config/dev.yaml
+
+# Start with early access (all features enabled)
+SIGNAL_HUB_EARLY_ACCESS=true signal-hub serve --config config/dev.yaml
 ```
 
 ### Discovery Commands
@@ -156,6 +176,12 @@ grep -r "NotImplementedError\|pass" src/
 signal-hub/
 ├── src/signal_hub/        # Main application code
 │   ├── core/             # MCP server implementation
+│   │   ├── plugins.py    # Plugin system (✓ IMPLEMENTED)
+│   │   ├── features.py   # Feature flags (✓ IMPLEMENTED)
+│   │   ├── server.py     # MCP server with plugin support
+│   │   └── tools.py      # Tool registry
+│   ├── plugins/          # Plugin implementations
+│   │   └── pro_example.py # Example Pro features
 │   ├── indexing/         # Code scanning and parsing
 │   │   ├── scanner.py    # Directory traversal
 │   │   ├── parsers/      # Language-specific parsers
@@ -169,19 +195,24 @@ signal-hub/
 │   ├── integration/     # Integration tests
 │   └── fixtures/        # Test data
 ├── planning/            # Sprint planning and tickets
-└── docs/               # Documentation
+├── docs/               # Documentation
+│   └── EDITIONS.md     # Signal Hub editions comparison
+└── examples/
+    └── plugin_demo.py  # Plugin system demonstration
 ```
 
 ## Current Sprint Focus (Sprint 1)
 
-Working on tickets in `planning/tickets/sprint-01/`:
-- SH-S01-001: Repository setup ✓
-- SH-S01-002: Python project structure ✓
-- SH-S01-003: Basic MCP server (Priority)
+Building Signal Hub Basic foundation with plugin architecture:
+- SH-S01-001: Repository setup (70% complete - needs branch protection)
+- SH-S01-002: Python project structure with plugins (✓ Partially complete)
+- SH-S01-003: Basic MCP server with plugin support (Priority)
 - SH-S01-004: Codebase scanner
 - SH-S01-005: File parser framework
 - SH-S01-006: Embedding generation
 - SH-S01-007: ChromaDB integration
+
+**Key Achievement**: Plugin architecture and feature flags already implemented!
 
 ## Testing Strategy
 
@@ -199,6 +230,9 @@ Follow the comprehensive testing strategy in `planning/testing-strategy.md`:
 4. **Performance matters**: Batch operations where possible
 5. **Document as you go**: Clear docstrings and comments
 6. **Open source quality**: This will be public code
+7. **Edition awareness**: Consider Basic vs Pro features when implementing
+8. **Plugin first**: New Pro features should be implemented as plugins
+9. **Feature flags**: Use `@require_feature` decorator for Pro/Enterprise features
 
 ## Getting Started
 
@@ -218,6 +252,15 @@ cat planning/tickets/sprint-01/SH-S01-003-mcp-server-implementation.md
 # 5. Begin TDD implementation
 ```
 
+## Key Documentation References
+
+- **Edition Strategy**: `docs/EDITIONS.md` - Feature comparison and pricing
+- **Sprint Overview**: `planning/sprints/overview.md` - High-level sprint plan
+- **Sprint Goals**: `planning/sprints/sprint-goals.md` - Detailed goals by edition
+- **Architecture**: `planning/architecture/system-design.md` - Plugin architecture
+- **Plugin System**: `src/signal_hub/core/plugins.py` - How to create plugins
+- **Feature Flags**: `src/signal_hub/core/features.py` - Edition management
+
 ---
 
-**Remember**: We're building an open source tool that will help thousands of developers. Quality and maintainability are paramount. Follow the sprint plan and ticket requirements closely.
+**Remember**: We're building Signal Hub Basic as a high-quality open source foundation, with clear paths to Pro ($29/mo + 15% of savings) and Enterprise editions. Quality and maintainability are paramount. Follow the sprint plan and ticket requirements closely.

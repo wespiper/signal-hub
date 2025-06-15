@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Get version
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Build package
+      run: |
+        poetry version ${{ steps.version.outputs.version }}
+        poetry build
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get changelog for this version from CHANGELOG.md
+        awk '/^## \[${{ steps.version.outputs.version }}\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release-notes.md
+        echo "Release notes:"
+        cat release-notes.md
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: release-notes.md
+        files: dist/*
+        fail_on_unmatched_files: true
+        generate_release_notes: true
+    
+    - name: Publish to Test PyPI
+      if: contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha')
+      env:
+        POETRY_PYPI_TOKEN_TEST_PYPI: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      run: |
+        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        poetry publish -r test-pypi
+    
+    - name: Publish to PyPI
+      if: "!contains(github.ref, 'rc') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha')"
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        poetry publish

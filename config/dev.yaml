@@ -1,9 +1,17 @@
 # Signal Hub Development Configuration
 
+# Edition: basic, pro, or enterprise
+# Set SIGNAL_HUB_EDITION environment variable or configure here
+edition: "basic"
+
+# Early access mode - enables all features for testing
+# Set SIGNAL_HUB_EARLY_ACCESS=true to enable
+early_access: false
+
 server:
   host: "localhost"
   port: 3333
-  name: "Signal Hub (Dev)"
+  name: "Signal Hub Basic (Dev)"
   description: "Intelligent MCP server for RAG-enhanced development"
 
 logging:
@@ -54,3 +62,27 @@ cache:
   enabled: true
   ttl_seconds: 3600
   max_size_mb: 500
+
+# Plugin configuration
+plugins:
+  # Basic plugins (always enabled)
+  basic_router:
+    enabled: true
+  basic_cache:
+    enabled: true
+  basic_analytics:
+    enabled: true
+  
+  # Pro plugins (require pro edition or early access)
+  ml_router:
+    enabled: false
+    model_path: "./models/routing_model.pkl"
+  advanced_analytics:
+    enabled: false
+    dashboard_port: 8080
+
+# Feature flags (override default feature availability)
+features:
+  # Enable specific pro features for testing
+  ml_routing_enabled: false
+  advanced_analytics_enabled: false

@@ -5,9 +5,13 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC to catch external link rot
+    - cron: '0 2 * * *'
 
 jobs:
   test:
+    name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -78,3 +82,79 @@ jobs:
     
     - name: Run mypy
       run: poetry run mypy src
+
+  link-check:
+    name: Check Links
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Link Checker
+      uses: lycheeverse/lychee-action@v1
+      with:
+        # Check all markdown and yaml files
+        args: --verbose --no-progress --accept 200,204,301,302 './**/*.md' './**/*.yaml' './**/*.yml'
+        fail: true
+        jobSummary: true
+        format: markdown
+    
+    - name: Upload link check results
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: link-checker-report
+        path: lychee/*.md
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  build:
+    name: Build Distribution
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Build package
+      run: |
+        poetry build
+        ls -la dist/
+    
+    - name: Check package
+      run: |
+        pip install twine
+        twine check dist/*
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/

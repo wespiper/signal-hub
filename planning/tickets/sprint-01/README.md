@@ -40,8 +40,8 @@ Establish a solid foundation with a working MCP server that can connect to Claud
 
 | Ticket ID | Title | Assignee | Status | Points |
 |-----------|-------|----------|---------|---------|
-| SH-S01-001 | Repository Setup | [DevOps] | To Do | 3 |
-| SH-S01-002 | Python Project Structure | [Backend] | To Do | 2 |
+| SH-S01-001 | Repository Setup (Hybrid Model) | [DevOps] | 🔄 70% Complete | 3 |
+| SH-S01-002 | Python Project Structure (Plugins) | [Backend] | To Do | 3 |
 | SH-S01-003 | MCP Server Implementation | [Senior Backend] | To Do | 5 |
 | SH-S01-004 | Codebase Scanner | [Backend] | To Do | 5 |
 | SH-S01-005 | File Parser Framework | [Backend] | To Do | 3 |

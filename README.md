@@ -1,17 +1,46 @@
 # Signal Hub
 
+![CI](https://github.com/wespiper/signal-hub/workflows/CI/badge.svg)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![License](https://img.shields.io/github/license/wespiper/signal-hub)
+![GitHub release](https://img.shields.io/github/v/release/wespiper/signal-hub?include_prereleases)
+
 > Intelligent developer assistant that extends Claude's context through MCP+RAG, providing seamless access to codebase knowledge while optimizing costs through smart model routing and caching.
 
 ## Overview
 
 Signal Hub is part of the Signal ecosystem, serving as the central convergence point where all your code context comes together for intelligent AI routing. It acts as an MCP (Model Context Protocol) server that gives Claude unlimited effective context through RAG (Retrieval-Augmented Generation) while intelligently routing queries to the most cost-effective model.
 
+### 🎯 Signal Hub Editions
+
+#### Signal Hub Basic (Open Source)
+The community edition provides core functionality for extending Claude's context:
+- ✅ MCP server integration with Claude Code
+- ✅ Codebase indexing and semantic search
+- ✅ Basic RAG retrieval and context assembly
+- ✅ Simple rule-based model routing
+- ✅ Semantic caching for repeated queries
+- ✅ Manual escalation to premium models
+- ✅ Basic cost tracking
+
+#### Signal Hub (Pro/Enterprise) - Coming Soon
+Advanced features for teams and power users:
+- 🚀 ML-powered intelligent model routing
+- 📈 Learning algorithms that improve over time
+- 💰 Advanced cost optimization (save 70%+ on AI costs)
+- 📊 Detailed analytics and ROI reporting
+- 👥 Team collaboration and sharing
+- 🔐 Enterprise security and compliance
+- ⚡ Priority support and SLAs
+
+> **Early Access Program**: Currently, all features are available to early adopters to help us refine the product and pricing. [Join our Discord](https://discord.gg/signalhub) to participate!
+
 ### Key Features
 
 - 🚀 **Unlimited Context**: Access your entire codebase through semantic search
 - 💰 **Cost Optimization**: Automatic routing between Haiku, Sonnet, and Opus based on complexity
 - ⚡ **Lightning Fast**: Semantic caching for instant responses to similar queries
-- 🔄 **Continuous Learning**: Improves routing decisions based on user feedback
+- 🔄 **Continuous Learning**: Improves routing decisions based on user feedback (Pro)
 - 🛠️ **Zero Friction**: Works out of the box with minimal configuration
 - 🌍 **Open Source**: Community-driven development with transparent roadmap
 
