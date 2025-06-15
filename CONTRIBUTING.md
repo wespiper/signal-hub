@@ -19,7 +19,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ### Suggesting Features
 
-1. Check our [roadmap](planning/mcp_rag_plan.md) and existing issues
+1. Check our [roadmap](docs/INITIAL_mcp_rag_plan.md) and existing issues
 2. Open a discussion in the GitHub Discussions tab
 3. Provide detailed use case and benefits
 
