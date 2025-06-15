@@ -84,20 +84,35 @@ def serve(
     print(f"[bold blue]{get_version_string()}[/bold blue]")
     print("\n[yellow]Starting Signal Hub server...[/yellow]")
     
-    # This will be implemented in SH-S01-003
-    print("\n[red]Error: Server implementation not yet complete (SH-S01-003)[/red]")
-    print("The MCP server will be implemented in the next ticket.")
+    # Check if MCP is available
+    try:
+        from signal_hub.core.server import run_server
+        import mcp
+    except ImportError:
+        print("\n[red]Error: MCP SDK not installed![/red]")
+        print("Please install the MCP SDK:")
+        print("  pip install mcp")
+        print("\nOr install all dependencies:")
+        print("  poetry install")
+        return
     
-    # Show what would happen
-    config_path = config or Path("config/dev.yaml")
-    print(f"\nWould start server with:")
-    print(f"  Config: {config_path}")
-    if host:
-        print(f"  Host: {host}")
-    if port:
-        print(f"  Port: {port}")
-    if reload:
-        print(f"  Auto-reload: Enabled")
+    # Run the server
+    try:
+        import asyncio
+        
+        config_path = str(config) if config else None
+        
+        if reload:
+            print("[yellow]Note: Auto-reload not yet implemented[/yellow]")
+        
+        # Run the async server
+        asyncio.run(run_server(config_path, host, port))
+        
+    except KeyboardInterrupt:
+        print("\n[yellow]Server stopped by user[/yellow]")
+    except Exception as e:
+        print(f"\n[red]Error: {str(e)}[/red]")
+        console.print_exception()
 
 
 @app.command()

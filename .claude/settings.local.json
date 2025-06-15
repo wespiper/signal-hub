@@ -18,7 +18,9 @@
       "Bash(--method PUT )",
       "Bash(--input /tmp/branch-protection.json)",
       "Bash(poetry --version)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(poetry run pytest:*)",
+      "Bash(python -m pytest tests/unit/test_server.py tests/unit/test_config.py tests/unit/test_tools.py -v --cov=signal_hub.core --cov=signal_hub.config --cov-report=term-missing)"
     ],
     "deny": []
   }
