@@ -1,5 +1,6 @@
 """Signal Hub CLI module."""
 
-from signal_hub.cli.main import app
+# Use the simple CLI to avoid Rich/Typer compatibility issues
+from signal_hub.cli.simple import app
 
 __all__ = ["app"]
