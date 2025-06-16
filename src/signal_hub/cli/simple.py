@@ -138,14 +138,99 @@ def index(
         raise typer.Exit(1)
     
     try:
-        # Import indexing components
-        from signal_hub.indexing.scanner import CodebaseScanner
-        from signal_hub.indexing.embeddings.service import EmbeddingService
-        from signal_hub.indexing.chunking.strategy import ChunkingStrategy
-        from signal_hub.indexing.parsers.registry import ParserRegistry
-        from signal_hub.storage.adapters.chromadb import ChromaDBAdapter
-        from signal_hub.config.settings import Settings
+        # Import indexing components with fallback
         import asyncio
+        try:
+            from signal_hub.indexing.scanner import CodebaseScanner
+            from signal_hub.indexing.embeddings.service import EmbeddingService
+            from signal_hub.indexing.chunking.strategy import ChunkingStrategy
+            from signal_hub.indexing.parsers.registry import ParserRegistry
+            from signal_hub.storage.adapters.chromadb import ChromaDBAdapter
+            from signal_hub.config.settings import Settings
+        except ImportError:
+            # Fallback for simpler demo
+            typer.echo("Using simplified indexing (some components not available)")
+            
+            # Create minimal implementation
+            async def run_minimal_indexing():
+                import chromadb
+                from pathlib import Path
+                import hashlib
+                
+                # Initialize ChromaDB
+                db_path = signal_hub_dir / "db"
+                db_path.mkdir(exist_ok=True)
+                client = chromadb.PersistentClient(path=str(db_path))
+                
+                # Get or create collection
+                try:
+                    collection = client.get_collection("signal_hub_index")
+                except:
+                    collection = client.create_collection(
+                        name="signal_hub_index",
+                        metadata={"hnsw:space": "cosine"}
+                    )
+                
+                # Simple file scanning
+                extensions = {".py", ".js", ".ts", ".jsx", ".tsx", ".md"}
+                files = []
+                for ext in extensions:
+                    files.extend(project_path.rglob(f"*{ext}"))
+                
+                # Filter out common ignore patterns
+                ignore_dirs = {"node_modules", ".git", "__pycache__", "dist", "build", ".venv", "venv"}
+                files = [f for f in files if not any(d in f.parts for d in ignore_dirs)]
+                
+                typer.echo(f"Found {len(files)} files to index")
+                
+                indexed = 0
+                for file_path in files:
+                    try:
+                        content = file_path.read_text(encoding="utf-8", errors="ignore")
+                        if not content.strip():
+                            continue
+                        
+                        # Simple chunking (by lines)
+                        lines = content.split("\n")
+                        chunk_size = 50
+                        
+                        for i in range(0, len(lines), chunk_size):
+                            chunk_lines = lines[i:i + chunk_size]
+                            chunk_content = "\n".join(chunk_lines)
+                            
+                            if len(chunk_content.strip()) < 10:
+                                continue
+                            
+                            # Generate ID
+                            chunk_id = hashlib.md5(
+                                f"{file_path}:{i}".encode()
+                            ).hexdigest()
+                            
+                            # Add to collection (ChromaDB will generate embeddings)
+                            collection.add(
+                                documents=[chunk_content],
+                                metadatas=[{
+                                    "file_path": str(file_path.relative_to(project_path)),
+                                    "start_line": i + 1,
+                                    "language": file_path.suffix,
+                                }],
+                                ids=[chunk_id]
+                            )
+                        
+                        indexed += 1
+                        if indexed % 10 == 0:
+                            typer.echo(f"Indexed {indexed} files...")
+                            
+                    except Exception as e:
+                        typer.echo(f"Error indexing {file_path}: {e}")
+                        continue
+                
+                typer.echo(f"\n✓ Indexing complete!")
+                typer.echo(f"Indexed {indexed} files")
+                typer.echo(f"Total chunks: {collection.count()}")
+            
+            asyncio.run(run_minimal_indexing())
+            return
         
         # Load config
         config_file = signal_hub_dir / "config.yaml"
@@ -252,26 +337,28 @@ def search(
         raise typer.Exit(1)
     
     try:
-        from signal_hub.storage.adapters.chromadb import ChromaDBAdapter
-        from signal_hub.config.settings import Settings
-        from signal_hub.indexing.embeddings.service import EmbeddingService
         import asyncio
+        import chromadb
         
         async def run_search():
-            settings = Settings()
-            store = ChromaDBAdapter(settings.vector_store)
-            await store.initialize()
+            # Use ChromaDB directly
+            db_path = signal_hub_dir / "db"
+            if not db_path.exists():
+                typer.echo("Error: No index found. Run 'signal-hub index .' first")
+                return
+                
+            client = chromadb.PersistentClient(path=str(db_path))
             
-            embedding_service = EmbeddingService(settings.embeddings)
+            try:
+                collection = client.get_collection("signal_hub_index")
+            except:
+                typer.echo("Error: No index found. Run 'signal-hub index .' first")
+                return
             
-            # Generate embedding for query
-            query_embedding = await embedding_service.embed(query)
-            
-            # Search
-            results = await store.search(
-                query_embedding=query_embedding,
-                n_results=limit,
-                metadata_filters={}
+            # Search using ChromaDB's built-in embedding
+            results = collection.query(
+                query_texts=[query],
+                n_results=limit
             )
             
             if not results or not results['documents'][0]:
@@ -284,10 +371,11 @@ def search(
                 results['metadatas'][0],
                 results['distances'][0]
             ), 1):
-                score = 1 - distance  # Convert distance to similarity score
+                score = 1 - (distance / 2)  # Convert distance to similarity score
                 typer.echo(f"{i}. {metadata.get('file_path', 'Unknown')}:{metadata.get('start_line', '')}")
                 typer.echo(f"   Score: {score:.3f}")
-                typer.echo(f"   {doc[:100]}...")
+                preview = doc.replace('\n', ' ')[:100]
+                typer.echo(f"   {preview}...")
                 typer.echo()
         
         asyncio.run(run_search())
