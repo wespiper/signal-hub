@@ -68,7 +68,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "signal-hub=signal_hub.cli.main:app",
+            "signal-hub=signal_hub.cli:app",
         ],
     },
 )
