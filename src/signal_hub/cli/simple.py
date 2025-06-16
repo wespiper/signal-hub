@@ -160,8 +160,11 @@ def index(
             typer.echo("Using simplified indexing (some components not available)")
             
             # Use optimized indexing implementation
-            from signal_hub.cli.indexing_optimized import run_optimized_indexing
-            asyncio.run(run_optimized_indexing(project_path, signal_hub_dir, fast_mode=fast, custom_extensions=extensions, force=force))
+            typer.echo("Using fallback indexing (some components not available)")
+            
+            # For large codebases, use ultra-fast indexing
+            from signal_hub.cli.indexing_fast import fast_index
+            fast_index(project_path, signal_hub_dir)
             return
         
         # Load config
@@ -282,10 +285,15 @@ def search(
             client = chromadb.PersistentClient(path=str(db_path))
             
             try:
-                collection = client.get_collection("signal_hub_index")
+                # Try fast index first
+                collection = client.get_collection("signal_hub_index_fast")
             except:
-                typer.echo("Error: No index found. Run 'signal-hub index .' first")
-                return
+                try:
+                    # Fall back to regular index
+                    collection = client.get_collection("signal_hub_index")
+                except:
+                    typer.echo("Error: No index found. Run 'signal-hub index .' first")
+                    return
             
             # Search using ChromaDB's built-in embedding
             results = collection.query(
