@@ -15,6 +15,8 @@ Options:
 
 Commands:
   init      Initialize Signal Hub for a project
+  index     Index a codebase for semantic search
+  search    Search indexed codebase
   serve     Start the Signal Hub MCP server
   config    Show current configuration
   version   Show detailed version and edition info
@@ -22,6 +24,8 @@ Commands:
 Examples:
   signal-hub init                    # Initialize in current directory
   signal-hub init /path/to/project   # Initialize in specific directory
+  signal-hub index .                 # Index current directory
+  signal-hub search "function name"  # Search for code
   signal-hub serve                   # Start server with defaults
   signal-hub serve --port 4000       # Start server on custom port
 """

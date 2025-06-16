@@ -4,6 +4,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional
+import asyncio
 
 # Simple version handling without Typer first
 if len(sys.argv) == 2 and sys.argv[1] in ["--version", "-v"]:
@@ -117,6 +118,122 @@ vector_store:
     typer.echo("\nNext steps:")
     typer.echo("1. Index your codebase: signal-hub index .")
     typer.echo("2. Start the server: signal-hub serve")
+
+
+@app.command()
+def index(
+    path: Path = typer.Argument(".", help="Path to codebase to index"),
+    recursive: bool = typer.Option(True, "--recursive/--no-recursive", help="Recursively index subdirectories"),
+    force: bool = typer.Option(False, "--force", "-f", help="Force re-indexing of all files"),
+):
+    """Index a codebase for semantic search."""
+    project_path = path.resolve()
+    typer.echo(f"Indexing codebase at: {project_path}")
+    
+    # Check if Signal Hub is initialized
+    signal_hub_dir = project_path / ".signal-hub"
+    if not signal_hub_dir.exists():
+        typer.echo("Error: Signal Hub not initialized in this directory")
+        typer.echo("Run 'signal-hub init' first")
+        raise typer.Exit(1)
+    
+    try:
+        # Import indexing components
+        from signal_hub.indexing.scanner import DirectoryScanner
+        from signal_hub.indexing.pipeline import IndexingPipeline
+        from signal_hub.storage.chromadb_store import ChromaDBStore
+        from signal_hub.config.settings import Settings
+        import asyncio
+        
+        # Load config
+        config_file = signal_hub_dir / "config.yaml"
+        settings = Settings()
+        
+        # Create pipeline
+        async def run_indexing():
+            # Initialize components
+            store = ChromaDBStore(settings.vector_store)
+            await store.initialize()
+            
+            scanner = DirectoryScanner()
+            pipeline = IndexingPipeline(store, settings.indexing)
+            
+            # Scan directory
+            typer.echo(f"Scanning {project_path}...")
+            files = await scanner.scan_directory(project_path)
+            typer.echo(f"Found {len(files)} files")
+            
+            # Index files
+            typer.echo("Indexing files...")
+            with typer.progressbar(files) as progress:
+                for file_path in progress:
+                    await pipeline.process_file(file_path)
+            
+            typer.echo("\n✓ Indexing complete!")
+            stats = await store.get_stats()
+            typer.echo(f"Total documents: {stats.get('total_documents', 0)}")
+            typer.echo(f"Total chunks: {stats.get('total_chunks', 0)}")
+        
+        # Run the async function
+        asyncio.run(run_indexing())
+        
+    except ImportError as e:
+        typer.echo(f"Error: Missing dependencies - {e}")
+        typer.echo("Some indexing components are not yet implemented")
+        typer.echo("This feature will be fully available in Sprint 2")
+    except Exception as e:
+        typer.echo(f"Error during indexing: {e}")
+        raise typer.Exit(1)
+
+
+@app.command()
+def search(
+    query: str = typer.Argument(..., help="Search query"),
+    limit: int = typer.Option(10, "--limit", "-l", help="Maximum number of results"),
+):
+    """Search indexed codebase."""
+    typer.echo(f"Searching for: {query}")
+    
+    # Check if Signal Hub is initialized
+    signal_hub_dir = Path(".").resolve() / ".signal-hub"
+    if not signal_hub_dir.exists():
+        typer.echo("Error: Signal Hub not initialized in this directory")
+        typer.echo("Run 'signal-hub init' first")
+        raise typer.Exit(1)
+    
+    try:
+        from signal_hub.retrieval.search import SearchEngine
+        from signal_hub.storage.chromadb_store import ChromaDBStore
+        from signal_hub.config.settings import Settings
+        import asyncio
+        
+        async def run_search():
+            settings = Settings()
+            store = ChromaDBStore(settings.vector_store)
+            await store.initialize()
+            
+            search_engine = SearchEngine(store)
+            results = await search_engine.search(query, limit=limit)
+            
+            if not results:
+                typer.echo("No results found")
+                return
+            
+            typer.echo(f"\nFound {len(results)} results:\n")
+            for i, result in enumerate(results, 1):
+                typer.echo(f"{i}. {result['file_path']}:{result.get('line_number', '')}")
+                typer.echo(f"   Score: {result['score']:.3f}")
+                typer.echo(f"   {result['content'][:100]}...")
+                typer.echo()
+        
+        asyncio.run(run_search())
+        
+    except ImportError as e:
+        typer.echo(f"Error: Search functionality not yet implemented")
+        typer.echo("This feature will be available in Sprint 2")
+    except Exception as e:
+        typer.echo(f"Error during search: {e}")
+        raise typer.Exit(1)
 
 
 @app.command()
