@@ -27,6 +27,7 @@ setup(
     python_requires=">=3.11",
     install_requires=[
         "chromadb>=0.4.0",
+        "onnxruntime>=1.14.0",  # Required by ChromaDB for embeddings
         "openai>=1.0.0",
         "pydantic>=2.0.0",
         "pydantic-settings>=2.0.0",

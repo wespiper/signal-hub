@@ -153,7 +153,21 @@ def index(
             
             # Create minimal implementation
             async def run_minimal_indexing():
-                import chromadb
+                try:
+                    import chromadb
+                except ImportError:
+                    typer.echo("Error: ChromaDB not installed. Run: pip install chromadb")
+                    raise typer.Exit(1)
+                    
+                # Check for onnxruntime (needed by ChromaDB)
+                try:
+                    import onnxruntime
+                except ImportError:
+                    typer.echo("Error: onnxruntime not installed (required by ChromaDB for embeddings)")
+                    typer.echo("Please run: pip install onnxruntime")
+                    typer.echo("\nNote: On some systems you may need: pip install onnxruntime-silicon (for Apple Silicon)")
+                    raise typer.Exit(1)
+                    
                 from pathlib import Path
                 import hashlib
                 
