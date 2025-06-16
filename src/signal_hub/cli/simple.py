@@ -162,9 +162,9 @@ def index(
             # Use optimized indexing implementation
             typer.echo("Using fallback indexing (some components not available)")
             
-            # For large codebases, use ultra-fast indexing
-            from signal_hub.cli.indexing_fast import fast_index
-            fast_index(project_path, signal_hub_dir)
+            # For large codebases, use minimal indexing (no embeddings)
+            from signal_hub.cli.indexing_minimal import minimal_index
+            minimal_index(project_path, signal_hub_dir)
             return
         
         # Load config
@@ -275,9 +275,15 @@ def search(
         import asyncio
         import chromadb
         
+        # Check if using minimal index
+        db_path = signal_hub_dir / "db"
+        if (db_path / "minimal_index.marker").exists():
+            from signal_hub.cli.indexing_minimal import minimal_search
+            minimal_search(query, signal_hub_dir, limit)
+            return
+            
         async def run_search():
             # Use ChromaDB directly
-            db_path = signal_hub_dir / "db"
             if not db_path.exists():
                 typer.echo("Error: No index found. Run 'signal-hub index .' first")
                 return
