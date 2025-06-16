@@ -167,17 +167,20 @@ def index(
             # Check if user wants local embeddings
             if local:
                 typer.echo("Using local embeddings for semantic search")
+                # Check if onnxruntime is available before importing
                 try:
-                    # Try full local embeddings first
+                    import onnxruntime
+                    # If successful, use full embeddings
                     from signal_hub.cli.indexing_local import index_with_local_embeddings
                     asyncio.run(index_with_local_embeddings(project_path, signal_hub_dir))
-                except Exception as e:
-                    if "onnxruntime" in str(e):
-                        typer.echo("\nONNXRuntime not compatible with your macOS version.")
-                        typer.echo("Using lightweight local search instead...\n")
+                except (ImportError, Exception) as e:
+                    if "onnxruntime" in str(e) or "dlopen" in str(e) or isinstance(e, ImportError):
+                        typer.echo("\n⚠️  ONNXRuntime not available or incompatible with your system.")
+                        typer.echo("Using lightweight TF-IDF search instead...\n")
                         from signal_hub.cli.indexing_local_lite import index_with_local_lite
                         asyncio.run(index_with_local_lite(project_path, signal_hub_dir))
                     else:
+                        typer.echo(f"\nError: {e}")
                         raise
             else:
                 # For large codebases, use minimal indexing (no embeddings)
