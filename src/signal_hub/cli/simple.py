@@ -125,8 +125,16 @@ def index(
     path: Path = typer.Argument(".", help="Path to codebase to index"),
     recursive: bool = typer.Option(True, "--recursive/--no-recursive", help="Recursively index subdirectories"),
     force: bool = typer.Option(False, "--force", "-f", help="Force re-indexing of all files"),
+    fast: bool = typer.Option(False, "--fast", help="Fast mode: larger chunks, less precision"),
+    extensions: str = typer.Option(None, "--extensions", "-e", help="Comma-separated list of file extensions to index (e.g., '.py,.js')"),
 ):
-    """Index a codebase for semantic search."""
+    """Index a codebase for semantic search.
+    
+    Examples:
+        signal-hub index .                    # Index current directory
+        signal-hub index . --fast             # Fast indexing with larger chunks
+        signal-hub index . -e ".py,.js,.md"   # Only index specific file types
+    """
     project_path = path.resolve()
     typer.echo(f"Indexing codebase at: {project_path}")
     
@@ -151,99 +159,9 @@ def index(
             # Fallback for simpler demo
             typer.echo("Using simplified indexing (some components not available)")
             
-            # Create minimal implementation
-            async def run_minimal_indexing():
-                try:
-                    import chromadb
-                except ImportError:
-                    typer.echo("Error: ChromaDB not installed. Run: pip install chromadb")
-                    raise typer.Exit(1)
-                    
-                # Check for onnxruntime (needed by ChromaDB)
-                try:
-                    import onnxruntime
-                except ImportError:
-                    typer.echo("Error: onnxruntime not installed (required by ChromaDB for embeddings)")
-                    typer.echo("Please run: pip install onnxruntime")
-                    typer.echo("\nNote: On some systems you may need: pip install onnxruntime-silicon (for Apple Silicon)")
-                    raise typer.Exit(1)
-                    
-                from pathlib import Path
-                import hashlib
-                
-                # Initialize ChromaDB
-                db_path = signal_hub_dir / "db"
-                db_path.mkdir(exist_ok=True)
-                client = chromadb.PersistentClient(path=str(db_path))
-                
-                # Get or create collection
-                try:
-                    collection = client.get_collection("signal_hub_index")
-                except:
-                    collection = client.create_collection(
-                        name="signal_hub_index",
-                        metadata={"hnsw:space": "cosine"}
-                    )
-                
-                # Simple file scanning
-                extensions = {".py", ".js", ".ts", ".jsx", ".tsx", ".md"}
-                files = []
-                for ext in extensions:
-                    files.extend(project_path.rglob(f"*{ext}"))
-                
-                # Filter out common ignore patterns
-                ignore_dirs = {"node_modules", ".git", "__pycache__", "dist", "build", ".venv", "venv"}
-                files = [f for f in files if not any(d in f.parts for d in ignore_dirs)]
-                
-                typer.echo(f"Found {len(files)} files to index")
-                
-                indexed = 0
-                for file_path in files:
-                    try:
-                        content = file_path.read_text(encoding="utf-8", errors="ignore")
-                        if not content.strip():
-                            continue
-                        
-                        # Simple chunking (by lines)
-                        lines = content.split("\n")
-                        chunk_size = 50
-                        
-                        for i in range(0, len(lines), chunk_size):
-                            chunk_lines = lines[i:i + chunk_size]
-                            chunk_content = "\n".join(chunk_lines)
-                            
-                            if len(chunk_content.strip()) < 10:
-                                continue
-                            
-                            # Generate ID
-                            chunk_id = hashlib.md5(
-                                f"{file_path}:{i}".encode()
-                            ).hexdigest()
-                            
-                            # Add to collection (ChromaDB will generate embeddings)
-                            collection.add(
-                                documents=[chunk_content],
-                                metadatas=[{
-                                    "file_path": str(file_path.relative_to(project_path)),
-                                    "start_line": i + 1,
-                                    "language": file_path.suffix,
-                                }],
-                                ids=[chunk_id]
-                            )
-                        
-                        indexed += 1
-                        if indexed % 10 == 0:
-                            typer.echo(f"Indexed {indexed} files...")
-                            
-                    except Exception as e:
-                        typer.echo(f"Error indexing {file_path}: {e}")
-                        continue
-                
-                typer.echo(f"\n✓ Indexing complete!")
-                typer.echo(f"Indexed {indexed} files")
-                typer.echo(f"Total chunks: {collection.count()}")
-            
-            asyncio.run(run_minimal_indexing())
+            # Use optimized indexing implementation
+            from signal_hub.cli.indexing_optimized import run_optimized_indexing
+            asyncio.run(run_optimized_indexing(project_path, signal_hub_dir, fast_mode=fast, custom_extensions=extensions, force=force))
             return
         
         # Load config
