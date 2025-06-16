@@ -157,9 +157,12 @@ def index(
             from signal_hub.indexing.parsers.registry import ParserRegistry
             from signal_hub.storage.adapters.chromadb import ChromaDBAdapter
             from signal_hub.config.settings import Settings
-        except ImportError:
+        except (ImportError, Exception) as e:
             # Fallback for simpler demo
-            typer.echo("Using simplified indexing (some components not available)")
+            if "onnxruntime" not in str(e):
+                typer.echo(f"Import error: {e}")
+            # Don't mention the error if it's just onnxruntime
+            pass
             
             # Use optimized indexing implementation
             typer.echo("Using fallback indexing (some components not available)")
