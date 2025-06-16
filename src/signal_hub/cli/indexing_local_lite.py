@@ -3,6 +3,8 @@
 import asyncio
 import hashlib
 import time
+import signal
+import sys
 from pathlib import Path
 from typing import List, Dict, Optional
 import json
@@ -125,16 +127,37 @@ class LocalLiteIndexer:
         # Build TF-IDF index
         typer.echo("\nBuilding search index...")
         
-        # Calculate document frequencies
+        # Calculate document frequencies with progress
+        typer.echo("Calculating token frequencies...")
         all_tokens = set()
-        for tokens in doc_tokens:
+        for i, tokens in enumerate(doc_tokens):
             all_tokens.update(tokens)
+            if i % 1000 == 0:
+                typer.echo(f"  Processed {i}/{len(doc_tokens)} documents...")
         
+        typer.echo(f"Found {len(all_tokens)} unique tokens")
+        
+        # Limit vocabulary size for performance
+        if len(all_tokens) > 50000:
+            typer.echo(f"Large vocabulary detected. Limiting to top 50k tokens...")
+            # Calculate token frequencies
+            token_counts = {}
+            for tokens in doc_tokens:
+                for token in tokens:
+                    token_counts[token] = token_counts.get(token, 0) + 1
+            # Keep only top 50k most frequent tokens
+            sorted_tokens = sorted(token_counts.items(), key=lambda x: x[1], reverse=True)
+            all_tokens = set(token for token, _ in sorted_tokens[:50000])
+        
+        typer.echo("Calculating document frequencies...")
         doc_freq = {}
-        for token in all_tokens:
+        for i, token in enumerate(all_tokens):
             doc_freq[token] = sum(1 for tokens in doc_tokens if token in tokens)
+            if i % 5000 == 0:
+                typer.echo(f"  Processed {i}/{len(all_tokens)} tokens...")
         
         # Calculate TF-IDF vectors (simplified)
+        typer.echo("\nCalculating TF-IDF scores...")
         import math
         n_docs = len(documents)
         
@@ -142,7 +165,8 @@ class LocalLiteIndexer:
             # Calculate TF-IDF for this document
             token_counts = {}
             for token in doc["tokens"]:
-                token_counts[token] = token_counts.get(token, 0) + 1
+                if token in all_tokens:  # Only use tokens in our vocabulary
+                    token_counts[token] = token_counts.get(token, 0) + 1
             
             # Simplified TF-IDF
             tfidf = {}
@@ -155,6 +179,9 @@ class LocalLiteIndexer:
             doc["tfidf"] = tfidf
             # Remove tokens to save space
             del doc["tokens"]
+            
+            if doc_idx % 1000 == 0:
+                typer.echo(f"  Processed {doc_idx}/{n_docs} documents...")
         
         # Save index
         typer.echo("Saving index...")
