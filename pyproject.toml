@@ -30,7 +30,7 @@ rich = "^13.0.0"
 typer = "^0.9.0"
 numpy = "^1.24.0"
 # asyncio is built into Python 3.11+
-aiofiles = "^23.0.0"
+aiofiles = "^24.1.0"
 click = "^8.1.0"
 python-dotenv = "^1.0.0"
 httpx = "^0.25.0"
