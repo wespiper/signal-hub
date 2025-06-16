@@ -139,9 +139,11 @@ def index(
     
     try:
         # Import indexing components
-        from signal_hub.indexing.scanner import DirectoryScanner
-        from signal_hub.indexing.pipeline import IndexingPipeline
-        from signal_hub.storage.chromadb_store import ChromaDBStore
+        from signal_hub.indexing.scanner import CodebaseScanner
+        from signal_hub.indexing.embeddings.service import EmbeddingService
+        from signal_hub.indexing.chunking.strategy import ChunkingStrategy
+        from signal_hub.indexing.parsers.registry import ParserRegistry
+        from signal_hub.storage.adapters.chromadb import ChromaDBAdapter
         from signal_hub.config.settings import Settings
         import asyncio
         
@@ -149,30 +151,78 @@ def index(
         config_file = signal_hub_dir / "config.yaml"
         settings = Settings()
         
-        # Create pipeline
+        # Create indexing pipeline
         async def run_indexing():
             # Initialize components
-            store = ChromaDBStore(settings.vector_store)
+            store = ChromaDBAdapter(settings.vector_store)
             await store.initialize()
             
-            scanner = DirectoryScanner()
-            pipeline = IndexingPipeline(store, settings.indexing)
+            scanner = CodebaseScanner()
+            embedding_service = EmbeddingService(settings.embeddings)
+            parser_registry = ParserRegistry()
             
             # Scan directory
             typer.echo(f"Scanning {project_path}...")
-            files = await scanner.scan_directory(project_path)
+            files = await scanner.scan(project_path)
             typer.echo(f"Found {len(files)} files")
             
-            # Index files
-            typer.echo("Indexing files...")
-            with typer.progressbar(files) as progress:
-                for file_path in progress:
-                    await pipeline.process_file(file_path)
+            if not files:
+                typer.echo("No files to index")
+                return
             
-            typer.echo("\n✓ Indexing complete!")
+            # Process files
+            indexed = 0
+            errors = 0
+            
+            for file_info in files:
+                try:
+                    # Parse file
+                    parser = parser_registry.get_parser(file_info.path)
+                    if not parser:
+                        continue
+                    
+                    content = file_info.path.read_text(encoding='utf-8')
+                    parsed = await parser.parse(content, str(file_info.path))
+                    
+                    # Chunk content
+                    chunks = ChunkingStrategy.chunk_code(
+                        parsed.content,
+                        language=file_info.extension.lstrip('.'),
+                        max_chunk_size=1000
+                    )
+                    
+                    # Generate embeddings and store
+                    for chunk in chunks:
+                        embedding = await embedding_service.embed(chunk.content)
+                        await store.add_documents([
+                            {
+                                'id': f"{file_info.path}:{chunk.start_line}",
+                                'content': chunk.content,
+                                'metadata': {
+                                    'file_path': str(file_info.path),
+                                    'start_line': chunk.start_line,
+                                    'end_line': chunk.end_line,
+                                    'language': file_info.extension,
+                                },
+                                'embedding': embedding
+                            }
+                        ])
+                    
+                    indexed += 1
+                    if indexed % 10 == 0:
+                        typer.echo(f"Indexed {indexed} files...")
+                        
+                except Exception as e:
+                    errors += 1
+                    typer.echo(f"Error indexing {file_info.path}: {e}")
+            
+            typer.echo(f"\n✓ Indexing complete!")
+            typer.echo(f"Successfully indexed: {indexed} files")
+            typer.echo(f"Errors: {errors} files")
+            
+            # Get stats
             stats = await store.get_stats()
-            typer.echo(f"Total documents: {stats.get('total_documents', 0)}")
-            typer.echo(f"Total chunks: {stats.get('total_chunks', 0)}")
+            typer.echo(f"Total chunks in database: {stats.get('total_documents', 0)}")
         
         # Run the async function
         asyncio.run(run_indexing())
@@ -202,28 +252,42 @@ def search(
         raise typer.Exit(1)
     
     try:
-        from signal_hub.retrieval.search import SearchEngine
-        from signal_hub.storage.chromadb_store import ChromaDBStore
+        from signal_hub.storage.adapters.chromadb import ChromaDBAdapter
         from signal_hub.config.settings import Settings
+        from signal_hub.indexing.embeddings.service import EmbeddingService
         import asyncio
         
         async def run_search():
             settings = Settings()
-            store = ChromaDBStore(settings.vector_store)
+            store = ChromaDBAdapter(settings.vector_store)
             await store.initialize()
             
-            search_engine = SearchEngine(store)
-            results = await search_engine.search(query, limit=limit)
+            embedding_service = EmbeddingService(settings.embeddings)
             
-            if not results:
+            # Generate embedding for query
+            query_embedding = await embedding_service.embed(query)
+            
+            # Search
+            results = await store.search(
+                query_embedding=query_embedding,
+                n_results=limit,
+                metadata_filters={}
+            )
+            
+            if not results or not results['documents'][0]:
                 typer.echo("No results found")
                 return
             
-            typer.echo(f"\nFound {len(results)} results:\n")
-            for i, result in enumerate(results, 1):
-                typer.echo(f"{i}. {result['file_path']}:{result.get('line_number', '')}")
-                typer.echo(f"   Score: {result['score']:.3f}")
-                typer.echo(f"   {result['content'][:100]}...")
+            typer.echo(f"\nFound {len(results['documents'][0])} results:\n")
+            for i, (doc, metadata, distance) in enumerate(zip(
+                results['documents'][0],
+                results['metadatas'][0],
+                results['distances'][0]
+            ), 1):
+                score = 1 - distance  # Convert distance to similarity score
+                typer.echo(f"{i}. {metadata.get('file_path', 'Unknown')}:{metadata.get('start_line', '')}")
+                typer.echo(f"   Score: {score:.3f}")
+                typer.echo(f"   {doc[:100]}...")
                 typer.echo()
         
         asyncio.run(run_search())
