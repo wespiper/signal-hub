@@ -44,6 +44,11 @@ setup(
         "bcrypt>=4.0.0",
         "questionary>=2.0.0",
         "watchdog>=3.0.0",
+        "tree-sitter>=0.21.0",
+        "tree-sitter-python>=0.21.0",
+        "tree-sitter-javascript>=0.21.0",
+        "tree-sitter-typescript>=0.21.0",
+        "aiohttp>=3.9.0",
     ],
     extras_require={
         "dev": [
