@@ -126,12 +126,14 @@ def index(
     recursive: bool = typer.Option(True, "--recursive/--no-recursive", help="Recursively index subdirectories"),
     force: bool = typer.Option(False, "--force", "-f", help="Force re-indexing of all files"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode: larger chunks, less precision"),
+    local: bool = typer.Option(False, "--local", "-l", help="Use local embeddings for semantic search"),
     extensions: str = typer.Option(None, "--extensions", "-e", help="Comma-separated list of file extensions to index (e.g., '.py,.js')"),
 ):
     """Index a codebase for semantic search.
     
     Examples:
-        signal-hub index .                    # Index current directory
+        signal-hub index .                    # Fast exact-match indexing
+        signal-hub index . --local            # Semantic search with local embeddings
         signal-hub index . --fast             # Fast indexing with larger chunks
         signal-hub index . -e ".py,.js,.md"   # Only index specific file types
     """
@@ -162,9 +164,15 @@ def index(
             # Use optimized indexing implementation
             typer.echo("Using fallback indexing (some components not available)")
             
-            # For large codebases, use minimal indexing (no embeddings)
-            from signal_hub.cli.indexing_minimal import minimal_index
-            minimal_index(project_path, signal_hub_dir)
+            # Check if user wants local embeddings
+            if local:
+                typer.echo("Using local embeddings for semantic search")
+                from signal_hub.cli.indexing_local import index_with_local_embeddings
+                asyncio.run(index_with_local_embeddings(project_path, signal_hub_dir))
+            else:
+                # For large codebases, use minimal indexing (no embeddings)
+                from signal_hub.cli.indexing_minimal import minimal_index
+                minimal_index(project_path, signal_hub_dir)
             return
         
         # Load config
@@ -281,6 +289,16 @@ def search(
             from signal_hub.cli.indexing_minimal import minimal_search
             minimal_search(query, signal_hub_dir, limit)
             return
+        
+        # Check if using local embeddings
+        try:
+            test_client = chromadb.PersistentClient(path=str(db_path))
+            test_client.get_collection("signal_hub_local")
+            from signal_hub.cli.indexing_local import search_with_local_embeddings
+            search_with_local_embeddings(query, signal_hub_dir, limit)
+            return
+        except:
+            pass  # Continue to other search methods
             
         async def run_search():
             # Use ChromaDB directly
@@ -291,15 +309,19 @@ def search(
             client = chromadb.PersistentClient(path=str(db_path))
             
             try:
-                # Try fast index first
-                collection = client.get_collection("signal_hub_index_fast")
+                # Try local embeddings first
+                collection = client.get_collection("signal_hub_local")
             except:
                 try:
-                    # Fall back to regular index
-                    collection = client.get_collection("signal_hub_index")
+                    # Try fast index
+                    collection = client.get_collection("signal_hub_index_fast")
                 except:
-                    typer.echo("Error: No index found. Run 'signal-hub index .' first")
-                    return
+                    try:
+                        # Fall back to regular index
+                        collection = client.get_collection("signal_hub_index")
+                    except:
+                        typer.echo("Error: No index found. Run 'signal-hub index .' first")
+                        return
             
             # Search using ChromaDB's built-in embedding
             results = collection.query(
