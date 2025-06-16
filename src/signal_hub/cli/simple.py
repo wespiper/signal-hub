@@ -14,9 +14,13 @@ if len(sys.argv) == 2 and sys.argv[1] in ["--version", "-v"]:
         print("Signal Hub 0.1.0")
     sys.exit(0)
 
-# Now import Typer
+# Now import Typer and disable Rich
 try:
     import typer
+    # Disable Rich formatting entirely to avoid compatibility issues
+    import os
+    os.environ["_TYPER_STANDARD_TRACEBACK"] = "1"
+    os.environ["_TYPER_COMPLETE_DISABLE_RICH"] = "1"
 except ImportError:
     print("Error: Typer not installed. Please run: pip install typer")
     sys.exit(1)
@@ -27,6 +31,7 @@ app = typer.Typer(
     help="Signal Hub - Intelligent MCP server for RAG-enhanced development",
     add_completion=False,
     pretty_exceptions_enable=False,  # Disable rich exceptions
+    rich_markup_mode=None,  # Disable rich markup
 )
 
 
