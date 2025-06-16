@@ -15,7 +15,8 @@ from signal_hub.core.features import get_edition, is_feature_enabled, Feature
 def version_callback(value: bool):
     """Show version when --version is passed."""
     if value:
-        print(f"Signal Hub {get_version_string()}")
+        version_str = get_version_string()
+        typer.echo(version_str)
         raise typer.Exit()
 
 
@@ -27,10 +28,11 @@ app = typer.Typer(
 console = Console()
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
+    ctx: typer.Context,
     version: bool = typer.Option(
-        None,
+        False,
         "--version",
         "-v",
         help="Show version and exit",
@@ -39,7 +41,10 @@ def main(
     ),
 ):
     """Signal Hub - Intelligent MCP server for RAG-enhanced development."""
-    pass
+    # If no command is provided, show help
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit()
 
 
 @app.command()
@@ -183,6 +188,92 @@ def search(
     print("\n[red]Error: Search not yet implemented (Sprint 2)[/red]")
     print("Semantic search will be implemented in Sprint 2.")
 
+
+@app.command()
+def init(
+    path: Path = typer.Option(
+        Path("."),
+        "--path",
+        "-p",
+        help="Project path to initialize"
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force reinitialization"
+    ),
+):
+    """Initialize Signal Hub for a project."""
+    project_path = path.resolve()
+    signal_hub_dir = project_path / ".signal-hub"
+    config_file = signal_hub_dir / "config.yaml"
+    
+    # Check if already initialized
+    if signal_hub_dir.exists() and not force:
+        print(f"[yellow]Signal Hub already initialized at {project_path}[/yellow]")
+        print("Use --force to reinitialize")
+        return
+    
+    # Create directories
+    print(f"[bold blue]Initializing Signal Hub at {project_path}[/bold blue]")
+    signal_hub_dir.mkdir(exist_ok=True)
+    (signal_hub_dir / "db").mkdir(exist_ok=True)
+    (signal_hub_dir / "logs").mkdir(exist_ok=True)
+    
+    # Create default config
+    default_config = """# Signal Hub Configuration
+project:
+  name: {project_name}
+  path: {project_path}
+
+edition: basic  # basic, pro, or enterprise
+early_access: false  # Set to true to enable all features
+
+server:
+  host: localhost
+  port: 3333
+
+indexing:
+  include:
+    - "**/*.py"
+    - "**/*.js"
+    - "**/*.ts"
+    - "**/*.jsx"
+    - "**/*.tsx"
+    - "**/*.md"
+  exclude:
+    - "**/node_modules/**"
+    - "**/.git/**"
+    - "**/__pycache__/**"
+    - "**/dist/**"
+    - "**/build/**"
+
+vector_store:
+  type: chromadb
+  persist_directory: .signal-hub/db
+
+logging:
+  level: INFO
+  file: .signal-hub/logs/signal-hub.log
+""".format(
+        project_name=project_path.name,
+        project_path=str(project_path)
+    )
+    
+    config_file.write_text(default_config)
+    
+    # Create .gitignore
+    gitignore = signal_hub_dir / ".gitignore"
+    gitignore.write_text("db/\nlogs/\n")
+    
+    print("[green]✓[/green] Created .signal-hub directory")
+    print("[green]✓[/green] Created default configuration")
+    print("\nNext steps:")
+    print("1. Index your codebase: [cyan]signal-hub index .[/cyan]")
+    print("2. Start the server: [cyan]signal-hub serve[/cyan]")
+    print("3. Configure Claude Code to use Signal Hub")
+    
 
 @app.command()
 def config():
