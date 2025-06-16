@@ -22,7 +22,17 @@
       "Bash(poetry run pytest:*)",
       "Bash(python -m pytest tests/unit/test_server.py tests/unit/test_config.py tests/unit/test_tools.py -v --cov=signal_hub.core --cov=signal_hub.config --cov-report=term-missing)",
       "Bash(python test:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(python -m pytest tests/unit/core/tools/test_search_tools.py -v)",
+      "Bash(python:*)",
+      "Bash(poetry add:*)",
+      "Bash(git restore:*)",
+      "Bash(pytest:*)",
+      "Bash(pip install:*)",
+      "Bash(poetry lock:*)",
+      "Bash(pip index versions:*)",
+      "Bash(pip show:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

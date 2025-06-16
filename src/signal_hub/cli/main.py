@@ -12,12 +12,34 @@ from rich.table import Table
 from signal_hub import get_version_string
 from signal_hub.core.features import get_edition, is_feature_enabled, Feature
 
+def version_callback(value: bool):
+    """Show version when --version is passed."""
+    if value:
+        print(f"Signal Hub {get_version_string()}")
+        raise typer.Exit()
+
+
 app = typer.Typer(
     name="signal-hub",
     help="Signal Hub - Intelligent MCP server for RAG-enhanced development",
     add_completion=False,
 )
 console = Console()
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        "-v",
+        help="Show version and exit",
+        callback=version_callback,
+        is_eager=True,
+    ),
+):
+    """Signal Hub - Intelligent MCP server for RAG-enhanced development."""
+    pass
 
 
 @app.command()
