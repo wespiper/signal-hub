@@ -167,8 +167,18 @@ def index(
             # Check if user wants local embeddings
             if local:
                 typer.echo("Using local embeddings for semantic search")
-                from signal_hub.cli.indexing_local import index_with_local_embeddings
-                asyncio.run(index_with_local_embeddings(project_path, signal_hub_dir))
+                try:
+                    # Try full local embeddings first
+                    from signal_hub.cli.indexing_local import index_with_local_embeddings
+                    asyncio.run(index_with_local_embeddings(project_path, signal_hub_dir))
+                except Exception as e:
+                    if "onnxruntime" in str(e):
+                        typer.echo("\nONNXRuntime not compatible with your macOS version.")
+                        typer.echo("Using lightweight local search instead...\n")
+                        from signal_hub.cli.indexing_local_lite import index_with_local_lite
+                        asyncio.run(index_with_local_lite(project_path, signal_hub_dir))
+                    else:
+                        raise
             else:
                 # For large codebases, use minimal indexing (no embeddings)
                 from signal_hub.cli.indexing_minimal import minimal_index
@@ -288,6 +298,12 @@ def search(
         if (db_path / "minimal_index.marker").exists():
             from signal_hub.cli.indexing_minimal import minimal_search
             minimal_search(query, signal_hub_dir, limit)
+            return
+        
+        # Check if using lightweight local index
+        if (db_path / "local_lite_index.marker").exists():
+            from signal_hub.cli.indexing_local_lite import search_with_local_lite
+            search_with_local_lite(query, signal_hub_dir, limit)
             return
         
         # Check if using local embeddings
